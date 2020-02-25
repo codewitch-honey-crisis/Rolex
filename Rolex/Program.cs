@@ -29,6 +29,7 @@ namespace Rolex
 			string codeclass = null;
 			string codelanguage = null;
 			string codenamespace = null;
+			string externaltoken = null;
 			string nfagraph = null;
 			string dfagraph = null;
 			bool ignorecase = false;
@@ -79,6 +80,12 @@ namespace Rolex
 									throw new ArgumentException(string.Format("The parameter \"{0}\" is missing an argument", args[i].Substring(1)));
 								++i; // advance 
 								codenamespace = args[i];
+								break;
+							case "/external":
+								if (args.Length - 1 == i) // check if we're at the end
+									throw new ArgumentException(string.Format("The parameter \"{0}\" is missing an argument", args[i].Substring(1)));
+								++i; // advance 
+								externaltoken = args[i];
 								break;
 							case "/nfagraph":
 								if (args.Length - 1 == i) // check if we're at the end
@@ -181,13 +188,18 @@ namespace Rolex
 						dfaTable = _ToDfaStateTable(fa,symids);
 						if (!noshared)
 						{
-							// import our Export/Token.cs into the library
-							_ImportCompileUnit(Deslanged.Token, cns);
+							if (string.IsNullOrEmpty(externaltoken))
+							{
+								// import our Export/Token.cs into the library
+								_ImportCompileUnit(Deslanged.Token, cns);
+							}
 
 							// import our Export/TableTokenizer.cs into the library
 							_ImportCompileUnit(Deslanged.TableTokenizer, cns);
 
 						}
+						if(!string.IsNullOrEmpty(externaltoken))
+							cns.Imports.Add(new CodeNamespaceImport(externaltoken));
 						var origName = "Rolex.";
 						CodeTypeDeclaration td = null;
 						if (null == td)
@@ -326,7 +338,8 @@ namespace Rolex
 		{
 			w.Write("Usage: "+Filename + " ");
 			w.WriteLine("<inputfile> [/output <outputfile>] [/class <codeclass>] [/namespace <codenamespace>]");
-			w.WriteLine("   [/language <codelanguage> [/ignorecase] [/noshared] [/ifstale]");
+			w.WriteLine("   [/language <codelanguage> [/external <externaltoken>] [/ignorecase] [/noshared]");
+			w.WriteLine("   [/ifstale]");
 			w.WriteLine();
 			w.WriteLine(Name + " generates a lexer/scanner/tokenizer in the target .NET language");
 			w.WriteLine();
@@ -335,6 +348,7 @@ namespace Rolex
 			w.WriteLine("   <codeclass>     The name of the main class to generate - default derived from <outputfile>");
 			w.WriteLine("   <codenamespace> The namespace to generate the code under - defaults to none");
 			w.WriteLine("   <codelanguage>  The .NET language to generate the code in - default derived from <outputfile>");
+			w.WriteLine("   <externaltoken> The namespace of the external token if one is to be used - default not external");
 			w.WriteLine("   <ignorecase>    Create a case insensitive lexer - defaults to case sensitive");
 			w.WriteLine("   <noshared>      Do not generate the shared code as part of the output. Defaults to generating the shared code");
 			w.WriteLine("   <ifstale>       Only generate if the input is newer than the output");

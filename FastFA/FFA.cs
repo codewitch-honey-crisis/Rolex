@@ -344,7 +344,7 @@ namespace F
 					{
 						case -1:
 						case 0:
-							result = Concat(new FFA[] { expr, Repeat(expr, 0, 0, accept) },accept);
+							result = Concat(new FFA[] { expr, Repeat(expr, 0, 0, accept) }, accept);
 							//Debug.Assert(null != result.FirstAcceptingState);
 							return result;
 						case 1:
@@ -1700,12 +1700,10 @@ namespace F
 			p.CopyTo(points, 0);
 			Array.Sort(points);
 
-			var comparer = _SetComparer.Default;
-
-			var sets = new Dictionary<HashSet<FFA>, HashSet<FFA>>(comparer);
-			var working = new Queue<HashSet<FFA>>();
-			var dfaMap = new Dictionary<HashSet<FFA>, FFA>(comparer);
-			var initial = new HashSet<FFA>();
+			var sets = new Dictionary<KeySet<FFA>, KeySet<FFA>>();
+			var working = new Queue<KeySet<FFA>>();
+			var dfaMap = new Dictionary<KeySet<FFA>, FFA>();
+			var initial = new KeySet<FFA>();
 			initial.Add(fa);
 			sets.Add(initial, initial);
 			working.Enqueue(initial);
@@ -1738,7 +1736,7 @@ namespace F
 				for (var i = 0; i < points.Length; i++)
 				{
 					var pnt = points[i];
-					var set = new HashSet<FFA>();
+					var set = new KeySet<FFA>();
 					foreach (FFA c in s)
 					{
 						foreach (var trns in c.Transitions)
@@ -1782,87 +1780,6 @@ namespace F
 				}
 			}
 			return result;
-		}
-		// this class provides a series of comparers for various FFA operations
-		// these are primarily used during powerset construction
-		// see: https://www.codeproject.com/Articles/5251448/Implementing-Value-Equality-in-Csharp
-		private sealed class _SetComparer :
-			IEqualityComparer<IList<FFA>>,
-			IEqualityComparer<ICollection<FFA>>,
-			IEqualityComparer<ISet<FFA>>
-		{
-			// unordered comparison
-			public bool Equals(ISet<FFA> lhs, ISet<FFA> rhs)
-			{
-				if (ReferenceEquals(lhs, rhs))
-					return true;
-				else if (ReferenceEquals(null, lhs) || ReferenceEquals(null, rhs))
-					return false;
-				return lhs.SetEquals(rhs);
-			}
-			// unordered comparison
-			public bool Equals(IList<FFA> lhs, IList<FFA> rhs)
-			{
-				if (ReferenceEquals(lhs, rhs))
-					return true;
-				else if (ReferenceEquals(null, lhs) || ReferenceEquals(null, rhs))
-					return false;
-				if (lhs.Count != rhs.Count)
-					return false;
-				using (var xe = lhs.GetEnumerator())
-				using (var ye = rhs.GetEnumerator())
-					while (xe.MoveNext() && ye.MoveNext())
-						if (!rhs.Contains(xe.Current) || !lhs.Contains(ye.Current))
-							return false;
-				return true;
-			}
-			// unordered comparison
-			public bool Equals(ICollection<FFA> lhs, ICollection<FFA> rhs)
-			{
-				if (ReferenceEquals(lhs, rhs))
-					return true;
-				else if (ReferenceEquals(null, lhs) || ReferenceEquals(null, rhs))
-					return false;
-				if (lhs.Count != rhs.Count)
-					return false;
-				using (var xe = lhs.GetEnumerator())
-				using (var ye = rhs.GetEnumerator())
-					while (xe.MoveNext() && ye.MoveNext())
-						if (!rhs.Contains(xe.Current) || !lhs.Contains(ye.Current))
-							return false;
-				return true;
-			}
-
-
-			public int GetHashCode(IList<FFA> lhs)
-			{
-				var result = 0;
-				for (int ic = lhs.Count, i = 0; i < ic; ++i)
-				{
-					var fa = lhs[i];
-					if (null != fa)
-						result ^= fa.GetHashCode();
-				}
-				return result;
-			}
-			public int GetHashCode(ISet<FFA> lhs)
-			{
-				var result = 0;
-				foreach (var fa in lhs)
-					if (null != fa)
-						result ^= fa.GetHashCode();
-				return result;
-			}
-			public int GetHashCode(ICollection<FFA> lhs)
-			{
-				var result = 0;
-				foreach (var fa in lhs)
-					if (null != fa)
-						result ^= fa.GetHashCode();
-				return result;
-			}
-
-			public static readonly _SetComparer Default = new _SetComparer();
 		}
 	}
 }

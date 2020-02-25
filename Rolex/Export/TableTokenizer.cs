@@ -206,7 +206,7 @@ namespace Rolex
 			_current.Line = _line;
 			_current.Column = _column;
 			_current.Position = _position;
-			_current.Skipped = null;
+			
 			_buffer.Clear();
 			// lex the next input
 			_current.SymbolId = _Lex();
@@ -235,7 +235,6 @@ namespace Rolex
 						_current.Line = _line;
 						_current.Column = _column;
 						_current.Position = _position;
-						_current.Skipped = null;
 						_buffer.Clear();
 						_current.SymbolId = _Lex();
 					}
