@@ -4,6 +4,7 @@ using System.Text;
 using LC;
 using System.Diagnostics;
 using System.IO;
+using System.Collections;
 namespace F{public partial class CharacterClasses{public static int[][]UnicodeCategories=new int[][]{new int[]{65,90,192,214,216,222,256,256,258,258,260,
 260,262,262,264,264,266,266,268,268,270,270,272,272,274,274,276,276,278,278,280,280,282,282,284,284,286,286,288,288,290,290,292,292,294,294,296,296,298,
 298,300,300,302,302,304,304,306,306,308,308,310,310,313,313,315,315,317,317,319,319,321,321,323,323,325,325,327,327,330,330,332,332,334,334,336,336,338,
@@ -969,26 +970,16 @@ t.Max,newstates[t.To.Tag]));}} foreach(var ffa in a.FillClosure()){var itrns=new
  Prev{get;set;}public _FList StateList{get;private set;}public FFA State{get;private set;}public void Remove(){StateList.Count--;if(StateList.First==this)
 {StateList.First=Next;}else{Prev.Next=Next;}if(StateList.Last==this){StateList.Last=Prev;}else{Next.Prev=Prev;}}}static FFA _Determinize(FFA fa){var p
 =new HashSet<int>();var closure=new List<FFA>();fa.FillClosure(closure);for(int ic=closure.Count,i=0;i<ic;++i){var ffa=closure[i];p.Add(0);foreach(var
- t in ffa.Transitions){p.Add(t.Min);if(t.Max<0x10ffff){p.Add((t.Max+1));}}}var points=new int[p.Count];p.CopyTo(points,0);Array.Sort(points);var comparer
-=_SetComparer.Default;var sets=new Dictionary<HashSet<FFA>,HashSet<FFA>>(comparer);var working=new Queue<HashSet<FFA>>();var dfaMap=new Dictionary<HashSet<FFA>,
-FFA>(comparer);var initial=new HashSet<FFA>();initial.Add(fa);sets.Add(initial,initial);working.Enqueue(initial);var result=new FFA();foreach(var afa in
- initial){if(afa.IsAccepting){result.IsAccepting=true;result.AcceptSymbol=afa.AcceptSymbol;break;}}dfaMap.Add(initial,result);while(working.Count>0){var
- s=working.Dequeue();FFA dfa;dfaMap.TryGetValue(s,out dfa);foreach(FFA q in s){if(q.IsAccepting){dfa.IsAccepting=true;dfa.AcceptSymbol=q.AcceptSymbol;
-break;}}for(var i=0;i<points.Length;i++){var pnt=points[i];var set=new HashSet<FFA>();foreach(FFA c in s){foreach(var trns in c.Transitions){if(trns.Min
-<=pnt&&pnt<=trns.Max){set.Add(trns.To);}}}if(!sets.ContainsKey(set)){sets.Add(set,set);working.Enqueue(set);dfaMap.Add(set,new FFA());}FFA dst;dfaMap.TryGetValue(set,
-out dst);int first=pnt;int last;if(i+1<points.Length)last=(points[i+1]-1);else last=0x10ffff;dfa.Transitions.Add(new FFATransition(first,last,dst));}}
- foreach(var ffa in result.FillClosure()){var itrns=new List<FFATransition>(ffa.Transitions);foreach(var trns in itrns){var acc=trns.To.FillAcceptingStates();
-if(0==acc.Count){ffa.Transitions.Remove(trns);}}}return result;} private sealed class _SetComparer:IEqualityComparer<IList<FFA>>,IEqualityComparer<ICollection<FFA>>,
-IEqualityComparer<ISet<FFA>>{ public bool Equals(ISet<FFA>lhs,ISet<FFA>rhs){if(ReferenceEquals(lhs,rhs))return true;else if(ReferenceEquals(null,lhs)||
-ReferenceEquals(null,rhs))return false;return lhs.SetEquals(rhs);} public bool Equals(IList<FFA>lhs,IList<FFA>rhs){if(ReferenceEquals(lhs,rhs))return true;
-else if(ReferenceEquals(null,lhs)||ReferenceEquals(null,rhs))return false;if(lhs.Count!=rhs.Count)return false;using(var xe=lhs.GetEnumerator())using(var
- ye=rhs.GetEnumerator())while(xe.MoveNext()&&ye.MoveNext())if(!rhs.Contains(xe.Current)||!lhs.Contains(ye.Current))return false;return true;} public bool
- Equals(ICollection<FFA>lhs,ICollection<FFA>rhs){if(ReferenceEquals(lhs,rhs))return true;else if(ReferenceEquals(null,lhs)||ReferenceEquals(null,rhs))
-return false;if(lhs.Count!=rhs.Count)return false;using(var xe=lhs.GetEnumerator())using(var ye=rhs.GetEnumerator())while(xe.MoveNext()&&ye.MoveNext())
-if(!rhs.Contains(xe.Current)||!lhs.Contains(ye.Current))return false;return true;}public int GetHashCode(IList<FFA>lhs){var result=0;for(int ic=lhs.Count,
-i=0;i<ic;++i){var fa=lhs[i];if(null!=fa)result^=fa.GetHashCode();}return result;}public int GetHashCode(ISet<FFA>lhs){var result=0;foreach(var fa in lhs)
-if(null!=fa)result^=fa.GetHashCode();return result;}public int GetHashCode(ICollection<FFA>lhs){var result=0;foreach(var fa in lhs)if(null!=fa)result^=
-fa.GetHashCode();return result;}public static readonly _SetComparer Default=new _SetComparer();}}}namespace F{partial class FFA{/// <summary>
+ t in ffa.Transitions){p.Add(t.Min);if(t.Max<0x10ffff){p.Add((t.Max+1));}}}var points=new int[p.Count];p.CopyTo(points,0);Array.Sort(points);var sets=
+new Dictionary<KeySet<FFA>,KeySet<FFA>>();var working=new Queue<KeySet<FFA>>();var dfaMap=new Dictionary<KeySet<FFA>,FFA>();var initial=new KeySet<FFA>();
+initial.Add(fa);sets.Add(initial,initial);working.Enqueue(initial);var result=new FFA();foreach(var afa in initial){if(afa.IsAccepting){result.IsAccepting
+=true;result.AcceptSymbol=afa.AcceptSymbol;break;}}dfaMap.Add(initial,result);while(working.Count>0){var s=working.Dequeue();FFA dfa;dfaMap.TryGetValue(s,
+out dfa);foreach(FFA q in s){if(q.IsAccepting){dfa.IsAccepting=true;dfa.AcceptSymbol=q.AcceptSymbol;break;}}for(var i=0;i<points.Length;i++){var pnt=points[i];
+var set=new KeySet<FFA>();foreach(FFA c in s){foreach(var trns in c.Transitions){if(trns.Min<=pnt&&pnt<=trns.Max){set.Add(trns.To);}}}if(!sets.ContainsKey(set))
+{sets.Add(set,set);working.Enqueue(set);dfaMap.Add(set,new FFA());}FFA dst;dfaMap.TryGetValue(set,out dst);int first=pnt;int last;if(i+1<points.Length)
+last=(points[i+1]-1);else last=0x10ffff;dfa.Transitions.Add(new FFATransition(first,last,dst));}} foreach(var ffa in result.FillClosure()){var itrns=new
+ List<FFATransition>(ffa.Transitions);foreach(var trns in itrns){var acc=trns.To.FillAcceptingStates();if(0==acc.Count){ffa.Transitions.Remove(trns);}
+}}return result;}}}namespace F{partial class FFA{/// <summary>
 /// Represents optional rendering parameters for a dot graph.
 /// </summary>
 public sealed class DotGraphOptions{/// <summary>
@@ -1049,4 +1040,16 @@ return;case'\b':builder.Append("\\b");return;default:var s=char.ConvertFromUtf32
 builder.Append(rangeChar.ToString("x8"));}}else builder.Append(s);break;}}static string _EscapeLabel(string label){if(string.IsNullOrEmpty(label))return
  label;string result=label.Replace("\\",@"\\");result=result.Replace("\"","\\\"");result=result.Replace("\n","\\n");result=result.Replace("\r","\\r");
 result=result.Replace("\0","\\0");result=result.Replace("\v","\\v");result=result.Replace("\t","\\t");result=result.Replace("\f","\\f");return result;
-}}}
+}}}namespace F{sealed class KeySet<T>:ISet<T>,IEquatable<KeySet<T>>{HashSet<T>_inner;int _hashCode;public KeySet(IEqualityComparer<T>comparer){_inner=
+new HashSet<T>(comparer);_hashCode=0;}public KeySet(){_inner=new HashSet<T>();_hashCode=0;}public int Count=>_inner.Count;public bool IsReadOnly=>true;
+ public bool Add(T item){if(null!=item)_hashCode^=item.GetHashCode();return _inner.Add(item);}bool ISet<T>.Add(T item){_ThrowReadOnly();return false;}
+public void Clear(){_ThrowReadOnly();}public bool Contains(T item){return _inner.Contains(item);}public void CopyTo(T[]array,int arrayIndex){_inner.CopyTo(array,
+arrayIndex);}void ISet<T>.ExceptWith(IEnumerable<T>other){_ThrowReadOnly();}public IEnumerator<T>GetEnumerator(){return _inner.GetEnumerator();}void ISet<T>.IntersectWith(IEnumerable<T>
+other){_ThrowReadOnly();}public bool IsProperSubsetOf(IEnumerable<T>other){return _inner.IsProperSubsetOf(other);}public bool IsProperSupersetOf(IEnumerable<T>
+other){return _inner.IsProperSupersetOf(other);}public bool IsSubsetOf(IEnumerable<T>other){return _inner.IsSubsetOf(other);}public bool IsSupersetOf(IEnumerable<T>
+other){return _inner.IsSupersetOf(other);}public bool Overlaps(IEnumerable<T>other){return _inner.Overlaps(other);}bool ICollection<T>.Remove(T item){
+_ThrowReadOnly();return false;}public bool SetEquals(IEnumerable<T>other){return _inner.SetEquals(other);}void ISet<T>.SymmetricExceptWith(IEnumerable<T>
+other){_ThrowReadOnly();}void ISet<T>.UnionWith(IEnumerable<T>other){_ThrowReadOnly();}void ICollection<T>.Add(T item){_ThrowReadOnly();}IEnumerator IEnumerable.GetEnumerator()
+{return _inner.GetEnumerator();}static void _ThrowReadOnly(){throw new NotSupportedException("The set is read only");}public bool Equals(KeySet<T>rhs)
+{if(ReferenceEquals(this,rhs))return true;if(ReferenceEquals(rhs,null))return false;if(rhs._hashCode!=_hashCode)return false;var ic=_inner.Count;if(ic
+!=rhs._inner.Count)return false;return _inner.SetEquals(rhs._inner);}public override int GetHashCode(){return _hashCode;}}}
