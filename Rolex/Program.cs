@@ -444,8 +444,13 @@ namespace Rolex
 			for (var i = 0; i < exprs.Length; ++i)
 			{
 				var rule = rules[i];
-
-				var fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), rule.Id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition, inputFile);
+				FFA fa;
+				if(rule.Expression.StartsWith("\""))
+				{
+					var pc = LexContext.Create(rule.Expression);
+					fa = FFA.Literal(UnicodeUtility.ToUtf32(pc.ParseJsonString()),rule.Id);
+				} else
+					fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), rule.Id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition, inputFile);
 				if (0 > rule.Id)
 					System.Diagnostics.Debugger.Break();
 				if (!ignoreCase)
