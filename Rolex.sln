@@ -4,10 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.7.34302.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rolex", "Rolex\Rolex.csproj", "{42203212-8CAA-4438-B564-8DF1543143B3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4D205050-39E1-4C0F-9205-FDE43B73095A} = {4D205050-39E1-4C0F-9205-FDE43B73095A}
-		{A9B8955F-FA48-40EF-9D4B-04D6DE685FAD} = {A9B8955F-FA48-40EF-9D4B-04D6DE685FAD}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RolexDemo", "RolexDemo\RolexDemo.csproj", "{10C4114B-F1E5-48CC-8786-AF7D0AB8438B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -19,18 +15,9 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RolexDemoVB", "RolexDemoVB\
 		{42203212-8CAA-4438-B564-8DF1543143B3} = {42203212-8CAA-4438-B564-8DF1543143B3}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LexContext", "LexContext\LexContext.csproj", "{4D205050-39E1-4C0F-9205-FDE43B73095A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharClsTableGen", "CharClsTableGen\CharClsTableGen.csproj", "{2A8E4869-FE68-4A30-BE9F-65CBB72B70B3}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastFA", "FastFA\FastFA.csproj", "{A9B8955F-FA48-40EF-9D4B-04D6DE685FAD}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2A8E4869-FE68-4A30-BE9F-65CBB72B70B3} = {2A8E4869-FE68-4A30-BE9F-65CBB72B70B3}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scratch", "scratch\scratch.csproj", "{040D98F4-057E-4C20-B0C2-DE8F1246C9CC}"
-	ProjectSection(ProjectDependencies) = postProject
-		{42203212-8CAA-4438-B564-8DF1543143B3} = {42203212-8CAA-4438-B564-8DF1543143B3}
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6680238-97D4-42C0-B738-7514A58DCDC7}"
+	ProjectSection(SolutionItems) = preProject
+		deslang.exe = deslang.exe
 	EndProjectSection
 EndProject
 Global
@@ -51,22 +38,6 @@ Global
 		{3B54B7A8-AE62-497F-98E9-7A83D6686B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B54B7A8-AE62-497F-98E9-7A83D6686B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B54B7A8-AE62-497F-98E9-7A83D6686B44}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D205050-39E1-4C0F-9205-FDE43B73095A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D205050-39E1-4C0F-9205-FDE43B73095A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D205050-39E1-4C0F-9205-FDE43B73095A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D205050-39E1-4C0F-9205-FDE43B73095A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2A8E4869-FE68-4A30-BE9F-65CBB72B70B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2A8E4869-FE68-4A30-BE9F-65CBB72B70B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2A8E4869-FE68-4A30-BE9F-65CBB72B70B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A8E4869-FE68-4A30-BE9F-65CBB72B70B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A9B8955F-FA48-40EF-9D4B-04D6DE685FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9B8955F-FA48-40EF-9D4B-04D6DE685FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9B8955F-FA48-40EF-9D4B-04D6DE685FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9B8955F-FA48-40EF-9D4B-04D6DE685FAD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{040D98F4-057E-4C20-B0C2-DE8F1246C9CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{040D98F4-057E-4C20-B0C2-DE8F1246C9CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{040D98F4-057E-4C20-B0C2-DE8F1246C9CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{040D98F4-057E-4C20-B0C2-DE8F1246C9CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,10 +15,6 @@
     <DefineConstants>TRACE;FFALIB</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LexContext\LexContext.csproj" />
-  </ItemGroup>
-
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="&quot;$(SolutionDir)CharClsTableGen.exe&quot; &quot;$(ProjectDir)CharacterClasses.cs&quot;" />
   </Target>
