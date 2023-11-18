@@ -46,7 +46,6 @@
     <Compile Include="CodeDomUtility.cs" />
     <Compile Include="CodeDomVisitor.cs" />
     <Compile Include="CodeGenerator.cs" />
-    <Compile Include="DfaEntry.cs" />
     <Compile Include="FastFA.brick.cs" />
     <Compile Include="LexContext.brick.cs" />
     <Compile Include="Token.cs" />
@@ -61,7 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Example.rl" />
+    <None Include="Example.rl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Key.snk" />
     <None Include="Slang.rl" />
   </ItemGroup>

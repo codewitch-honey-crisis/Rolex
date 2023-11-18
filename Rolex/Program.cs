@@ -171,7 +171,7 @@ namespace Rolex
 						if (!string.IsNullOrEmpty(codenamespace))
 							cns.Name = codenamespace;
 						ccu.Namespaces.Add(cns);
-						var fa = _BuildLexer(rules, ignorecase,inputfile);
+						var fa = _BuildLexer(rules, ignorecase,inputfile,true);
 						var symbolTable = _BuildSymbolTable(rules);
 						var symids = new int[symbolTable.Length];
 						for (var i = 0; i < symbolTable.Length; ++i)
@@ -180,12 +180,16 @@ namespace Rolex
 						var nodeFlags = _BuildNodeFlags(rules);
 						if (null != nfagraph)
 						{
-							fa.RenderToFile(nfagraph);
+							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false);
+							fa2.RenderToFile(nfagraph);
 						}
-						
+
 						fa = fa.ToDfa();
-						DfaEntry[] dfaTable = null;
-						dfaTable = _ToDfaStateTable(fa,symids);
+						if(null!=dfagraph)
+						{
+							fa.RenderToFile(dfagraph);
+						}
+						int[] dfaTable = _ToDfaStateTable(fa,symids);
 						if (!noshared)
 						{
 							if (string.IsNullOrEmpty(externaltoken))
@@ -222,8 +226,7 @@ namespace Rolex
 						CodeMemberField f = null;
 						
 						f = CodeDomUtility.GetByName("DfaTable", td.Members) as CodeMemberField;
-						f.InitExpression = CodeGenerator.GenerateDfaTableInitializer(dfaTable);
-
+						f.InitExpression = CodeDomUtility.Literal(dfaTable);
 						f = CodeDomUtility.GetByName("NodeFlags", td.Members) as CodeMemberField;
 						f.InitExpression = CodeDomUtility.Literal(nodeFlags);
 						f = CodeDomUtility.GetByName("BlockEnds", td.Members) as CodeMemberField;
@@ -397,6 +400,30 @@ namespace Rolex
 			}
 			return result;
 		}
+		static FFA ParseToFA(LexRule rule,bool ignoreCase)
+		{
+			FFA fa;
+			if (rule.Expression.StartsWith("\""))
+			{
+				var pc = LexContext.Create(rule.Expression);
+				fa = FFA.Literal(UnicodeUtility.ToUtf32(pc.ParseJsonString()), rule.Id);
+			}
+			else
+				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), 0, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition);
+			if (!ignoreCase)
+			{
+				var ic = (bool)rule.GetAttribute("ignoreCase", false);
+				if (ic)
+					fa = FFA.CaseInsensitive(fa, rule.Id);
+			}
+			else
+			{
+				var ic = (bool)rule.GetAttribute("ignoreCase", true);
+				if (ic)
+					fa = FFA.CaseInsensitive(fa, rule.Id);
+			}
+			return fa;
+		}
 		static int[][] _BuildBlockEnds(IList<LexRule> rules)
 		{
 			int max = int.MinValue;
@@ -409,11 +436,33 @@ namespace Rolex
 			var result = new int[max + 1][];
 			for (int ic = rules.Count, i = 0; i < ic; ++i)
 			{
+				var ci = false;
 				var rule = rules[i];
-				var be = rule.GetAttribute("blockEnd") as string;
+				var ica = rule.GetAttribute("ignoreCase");
+				if (null != ica && ica is bool)
+				{
+					ci = (bool)ica;
+				}
+				var v = rule.GetAttribute("blockEnd");
+				var be = v as string;
 				if (!string.IsNullOrEmpty(be))
 				{
-					result[rule.Id] = new List<int>(UnicodeUtility.ToUtf32(be)).ToArray();
+					var cfa = FFA.Literal(UnicodeUtility.ToUtf32(be), 0);
+					if (ci)
+						cfa = FFA.CaseInsensitive(cfa, 0);
+					cfa = cfa.ToMinimized();
+					result[rule.Id] = cfa.ToDfaTable();
+				}
+				else
+				{
+					var lr = v as LexRule;
+					if (null != lr)
+					{
+						var fa = ParseToFA(lr, ci);
+					
+						fa = fa.ToMinimized();
+						result[rule.Id] = fa.ToDfaTable();
+					}
 				}
 			}
 			return result;
@@ -437,7 +486,7 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile)
+		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized)
 		{
 			var exprs = new FFA[rules.Count];
 			var result = new FFA();
@@ -465,13 +514,12 @@ namespace Rolex
 					if (ic)
 						fa = FFA.CaseInsensitive(fa, rule.Id);
 				}
-
-
-				result.AddEpsilon(fa);
+				result.AddEpsilon(minimized?fa.ToMinimized():fa);
 			}
 			return result;
 		}
-		static DfaEntry[] _ToDfaStateTable(FFA dfa, IList<int> symbolTable = null)
+		
+		static int[] _ToDfaStateTable(FFA dfa, IList<int> symbolTable = null)
 		{
 			var closure = dfa.FillClosure();
 			var symbolLookup = new Dictionary<int, int>();
@@ -502,52 +550,7 @@ namespace Rolex
 				}
 
 			// build the root array
-			var result = new DfaEntry[closure.Count];
-			for (var i = 0; i < result.Length; i++)
-			{
-				var fa = closure[i];
-#if DEBUG
-				if (fa.IsAccepting)
-					System.Diagnostics.Debug.Assert(-1 < fa.AcceptSymbol, "Illegal accept symbol " + fa.AcceptSymbol.ToString() + " was found on state state q" + i.ToString());
-#endif
-				// get all the transition ranges for each destination state
-				var trgs = fa.FillInputTransitionRangesGroupedByState();
-				// make a new transition entry array for our DFA state table
-				var trns = new DfaTransitionEntry[trgs.Count];
-				var j = 0;
-				// for each transition range
-				foreach (var trg in trgs)
-				{
-					// add the transition entry using
-					// the packed ranges from CharRange
-					trns[j] = new DfaTransitionEntry(
-						trg.Value,
-						closure.IndexOf(trg.Key));
-
-					++j;
-				}
-
-				// now add the state entry for the state above
-#if DEBUG
-				if (fa.IsAccepting && !symbolLookup.ContainsKey(fa.AcceptSymbol))
-				{
-					try
-					{
-						dfa.RenderToFile(@"dfastatetable_crashdump_dfa.jpg");
-					}
-					catch
-					{
-
-					}
-					System.Diagnostics.Debug.Assert(false, "The symbol table did not contain an entry for state q" + i.ToString());
-				}
-#endif
-				result[i] = new DfaEntry(
-					fa.IsAccepting ? symbolLookup[fa.AcceptSymbol] : -1,
-					trns);
-
-			}
-			return result;
+			return dfa.ToDfaTable();
 		}
 	}
 

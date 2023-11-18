@@ -14,16 +14,6 @@ namespace Rolex
 	using C = CD.CodeDomUtility;
 	static class CodeGenerator
 	{
-		const int _ErrorSymbol = -1;
-		const int _EosSymbol = -2;
-		const int _Disposed = -4;
-		const int _BeforeBegin = -3;
-		const int _AfterEnd = -2;
-		const int _InnerFinished = -1;
-		const int _Enumerating = 0;
-		const int _TabWidth = 4;
-
-		
 		
 		static string _MakeSafeName(string name)
 		{
@@ -74,67 +64,6 @@ namespace Rolex
 			}
 		}
 		
-		// we use our own serialization here to avoid the codedom trying to reference the DfaEntry under the wrong namespace
-		public static CodeExpression GenerateDfaTableInitializer(DfaEntry[] dfaTable)
-		{
-			var result = new CodeArrayCreateExpression("DfaEntry");
-			for(var i = 0;i<dfaTable.Length;i++)
-			{
-				var entry = new CodeObjectCreateExpression("DfaEntry");
-				var transitions = new CodeArrayCreateExpression("DfaTransitionEntry");
-				var de = dfaTable[i];
-				var trns = de.Transitions;
-				for (var j = 0; j < trns.Length; j++)
-				{
-					var transition = new CodeObjectCreateExpression(transitions.CreateType);
-					var ranges = new CodeArrayCreateExpression(typeof(int));
-					var trn = trns[j];
-					var rngs = trn.PackedRanges;
-					for (var k=0;k<rngs.Length;k++)
-						ranges.Initializers.Add(new CodePrimitiveExpression(rngs[k]));
-					transition.Parameters.Add(ranges);
-					transition.Parameters.Add(new CodePrimitiveExpression(trn.Destination));
-					transitions.Initializers.Add(transition);
-				}
-				entry.Parameters.Add(transitions);
-				entry.Parameters.Add(new CodePrimitiveExpression(de.AcceptSymbolId));
-				result.Initializers.Add(entry);
-			}
-			return result;
-		}
-
-		
-		// generates an "NFA" table from a dfa state table, primarily for testing
-		public static CodeExpression GenerateNfaTableInitializer(DfaEntry[] dfaTable)
-		{
-			var result = new CodeArrayCreateExpression("NfaEntry");
-			for (var i = 0; i < dfaTable.Length; i++)
-			{
-				var entry = new CodeObjectCreateExpression("NfaEntry");
-				var transitions = new CodeArrayCreateExpression("NfaTransitionEntry");
-				var ne = dfaTable[i];
-				var trns = ne.Transitions;
-				for (var j = 0; j < trns.Length; j++)
-				{
-					var transition = new CodeObjectCreateExpression(transitions.CreateType);
-					var ranges = new CodeArrayCreateExpression(typeof(int));
-					var trn = trns[j];
-					var rngs = trn.PackedRanges;
-					for (var k = 0; k < rngs.Length; k++)
-						ranges.Initializers.Add(new CodePrimitiveExpression(rngs[k]));
-					transition.Parameters.Add(ranges);
-					transition.Parameters.Add(new CodePrimitiveExpression(trn.Destination));
-					transitions.Initializers.Add(transition);
-				}
-				entry.Parameters.Add(new CodePrimitiveExpression(ne.AcceptSymbolId));
-				entry.Parameters.Add(transitions);
-				var etrns = new CodeArrayCreateExpression(typeof(int[]));
-				entry.Parameters.Add(etrns);
-				result.Initializers.Add(entry);
-			}
-			return result;
-		}
-
 		public static readonly CodeAttributeDeclaration GeneratedCodeAttribute
 			= new CodeAttributeDeclaration(C.Type(typeof(GeneratedCodeAttribute)), new CodeAttributeArgument(C.Literal("Rolex")), new CodeAttributeArgument(C.Literal(Assembly.GetExecutingAssembly().GetName().Version.ToString())));
 	}

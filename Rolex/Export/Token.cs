@@ -14,6 +14,10 @@
 		/// </summary>
 		public int Column;
 		/// <summary>
+		/// Indicates the character index where the token occurs
+		/// </summary>
+		public long AbsoluteIndex;
+		/// <summary>
 		/// Indicates the position where the token occurs
 		/// </summary>
 		public long Position;

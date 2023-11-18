@@ -42,7 +42,7 @@ namespace Rolex
 				throw new ExpectingException("Expecting identifier", lc.Line, lc.Column, lc.Position, lc.FileOrUrl, "identifier");
 			result.Symbol = lc.GetCapture(ll);
 			lc.TrySkipCCommentsAndWhiteSpace();
-			lc.Expecting('=','<');
+			lc.Expecting('=', '<');
 			if ('<' == lc.Current)
 			{
 				lc.Advance();
@@ -67,7 +67,29 @@ namespace Rolex
 						l = lc.Line;
 						c = lc.Column;
 						p = lc.Position;
-						var value = lc.ParseJsonValue();
+						object value = null;
+						if (lc.Current == '\'')
+						{
+							// this is a regular expression.
+							// we store an anonymous LexRule for it in the attribute
+							var newRule = new LexRule();
+							newRule.ExpressionLine = lc.Line;
+							newRule.ExpressionColumn = lc.Column;
+							newRule.ExpressionPosition = lc.Position;
+							lc.ClearCapture();
+							lc.Capture();
+							lc.Advance();
+							lc.TryReadUntil('\'', '\\', false);
+							lc.Expecting('\'');
+							lc.Capture();
+							newRule.Expression = lc.GetCapture();
+							lc.Advance();
+							value = newRule;
+						}
+						else
+						{
+							value = lc.ParseJsonValue();
+						}
 						attrs.Add(new KeyValuePair<string, object>(aname, value));
 						if (0 == string.Compare("id", aname) && (value is double))
 						{

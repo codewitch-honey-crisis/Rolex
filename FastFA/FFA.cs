@@ -3,6 +3,29 @@
 // This is the only file this applies to.
 
 /*
+ * 
+* The MIT License (MIT)
+* 
+* Copyright (c) 2013 Nikos Baxevanis
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE
+* 
  * dk.brics.automaton
  * 
  * Copyright (c) 2001-2011 Anders Moeller
@@ -450,7 +473,7 @@ namespace F
 				switch (pc.Current)
 				{
 					case -1:
-						result = result.ToMinimized();
+						//result = result.ToMinimized();
 						return result;
 					case '.':
 						var dot = FFA.Set(new KeyValuePair<int, int>[] { new KeyValuePair<int, int>(0, 0x10ffff) }, accept);
@@ -632,7 +655,7 @@ namespace F
 							result = next;
 						break;
 					case ')':
-						result = result.ToMinimized();
+						//result = result.ToMinimized();
 						return result;
 					case '(':
 						pc.Advance();
@@ -841,180 +864,7 @@ namespace F
 			pc.Advance();
 			return new KeyValuePair<bool, int[]>(isNot, result.ToArray());
 		}
-		static int[] _ParseRanges(LexContext pc)
-		{
-			pc.EnsureStarted();
-			var result = new List<int>();
-			int[] next = null;
-			bool readDash = false;
-			while (-1 != pc.Current && ']' != pc.Current)
-			{
-				switch (pc.Current)
-				{
-					case '[': // char class 
-						if (null != next)
-						{
-							result.Add(next[0]);
-							result.Add(next[1]);
-							if (readDash)
-							{
-								result.Add('-');
-								result.Add('-');
-							}
-						}
-						pc.Advance();
-						pc.Expecting(':');
-						pc.Advance();
-						var l = pc.CaptureBuffer.Length;
-						var lin = pc.Line;
-						var col = pc.Column;
-						var pos = pc.Position;
-						pc.TryReadUntil(':', false);
-						var n = pc.GetCapture(l);
-						pc.Advance();
-						pc.Expecting(']');
-						pc.Advance();
-						int[] rngs;
-						if (!CharacterClasses.Known.TryGetValue(n, out rngs))
-						{
-							var sa = new string[CharacterClasses.Known.Count];
-							CharacterClasses.Known.Keys.CopyTo(sa, 0);
-							throw new ExpectingException("Invalid character class " + n, lin, col, pos, pc.FileOrUrl, sa);
-						}
-						result.AddRange(rngs);
-						readDash = false;
-						next = null;
-						break;
-					case '\\':
-						pc.Advance();
-						pc.Expecting();
-						switch (pc.Current)
-						{
-							case 'h':
-								_ParseCharClassEscape(pc, "space", result, ref next, ref readDash);
-								break;
-							case 'd':
-								_ParseCharClassEscape(pc, "digit", result, ref next, ref readDash);
-								break;
-							case 'D':
-								_ParseCharClassEscape(pc, "^digit", result, ref next, ref readDash);
-								break;
-							case 'l':
-								_ParseCharClassEscape(pc, "lower", result, ref next, ref readDash);
-								break;
-							case 's':
-								_ParseCharClassEscape(pc, "space", result, ref next, ref readDash);
-								break;
-							case 'S':
-								_ParseCharClassEscape(pc, "^space", result, ref next, ref readDash);
-								break;
-							case 'u':
-								_ParseCharClassEscape(pc, "upper", result, ref next, ref readDash);
-								break;
-							case 'w':
-								_ParseCharClassEscape(pc, "word", result, ref next, ref readDash);
-								break;
-							case 'W':
-								_ParseCharClassEscape(pc, "^word", result, ref next, ref readDash);
-								break;
-							default:
-								var ch = (char)_ParseRangeEscapePart(pc);
-								if (null == next)
-									next = new int[] { ch, ch };
-								else if (readDash)
-								{
-									result.Add(next[0]);
-									result.Add(ch);
-									next = null;
-									readDash = false;
-								}
-								else
-								{
-									result.AddRange(next);
-									next = new int[] { ch, ch };
-								}
-
-								break;
-						}
-
-						break;
-					case '-':
-						pc.Advance();
-						if (null == next)
-						{
-							next = new int[] { '-', '-' };
-							readDash = false;
-						}
-						else
-						{
-							if (readDash)
-								result.AddRange(next);
-
-							readDash = true;
-						}
-						break;
-					default:
-						if (null == next)
-						{
-							next = new int[] { pc.Current, pc.Current };
-						}
-						else
-						{
-							if (readDash)
-							{
-								result.Add(next[0]);
-								result.Add((char)pc.Current);
-								next = null;
-								readDash = false;
-							}
-							else
-							{
-								result.AddRange(next);
-								next = new int[] { pc.Current, pc.Current };
-							}
-						}
-						pc.Advance();
-						break;
-				}
-			}
-			if (null != next)
-			{
-				result.AddRange(next);
-				if (readDash)
-				{
-					result.Add('-');
-					result.Add('-');
-				}
-			}
-			return result.ToArray();
-		}
-
-		static void _ParseCharClassEscape(LexContext pc, string cls, List<int> result, ref int[] next, ref bool readDash)
-		{
-			if (null != next)
-			{
-				result.AddRange(next);
-				if (readDash)
-				{
-					result.Add('-');
-					result.Add('-');
-				}
-				result.Add('-');
-				result.Add('-');
-			}
-			pc.Advance();
-			int[] rngs;
-			if (!CharacterClasses.Known.TryGetValue(cls, out rngs))
-			{
-				var sa = new string[CharacterClasses.Known.Count];
-				CharacterClasses.Known.Keys.CopyTo(sa, 0);
-				throw new ExpectingException("Invalid character class " + cls, pc.Line, pc.Column, pc.Position, pc.FileOrUrl, sa);
-			}
-			result.AddRange(rngs);
-			next = null;
-			readDash = false;
-		}
-
+		
 		static FFA _ParseModifier(FFA expr, LexContext pc, int accept)
 		{
 			var line = pc.Line;
@@ -1160,6 +1010,9 @@ namespace F
 				return -1;
 			switch (pc.Current)
 			{
+				case '0':
+					pc.Advance();
+					return '\0';
 				case 'f':
 					pc.Advance();
 					return '\f';
@@ -1260,6 +1113,10 @@ namespace F
 				if (e.Current.Key > 0)
 				{
 					yield return new KeyValuePair<int, int>(0, unchecked(e.Current.Key - 1));
+					last = e.Current.Value;
+					if (0x10ffff <= last)
+						yield break;
+				} else if(e.Current.Key==0) {
 					last = e.Current.Value;
 					if (0x10ffff <= last)
 						yield break;
@@ -1625,8 +1482,88 @@ namespace F
 				return new _FListNode(q, this);
 			}
 		}
+		public int[] ToDfaTable() {
+			FFA fa = this;
+			if(!IsDeterministic)
+			{
+				fa = this.ToMinimized();
+			}
+			var working = new List<int>();
+			var closure = new List<F.FFA>();
+			fa.FillClosure(closure);
+			var stateIndices = new int[closure.Count];
+			for (var i = 0; i < closure.Count; ++i) {
+				var cfa = closure[i];
+				stateIndices[i] = working.Count;
+				// add the accept
+				working.Add(cfa.IsAccepting ? cfa.AcceptSymbol : -1);
+				var itrgp = cfa.FillInputTransitionRangesGroupedByState();
+				// add the number of transitions
+				working.Add(itrgp.Count);
+				foreach (var itr in itrgp) {
+					// We have to fill in the following after the fact
+					// We don't have enough info here
+					// for now just drop the state index as a placeholder
+					working.Add(closure.IndexOf(itr.Key));
+					// add the number of packed ranges
+					working.Add(itr.Value.Length / 2);
+					// add the packed ranges
+					working.AddRange(itr.Value);
 
-
+				}
+			}
+			var result = working.ToArray();
+			var state = 0;
+			while (state < result.Length) {
+				state++;
+				var tlen = result[state++];
+				for (var i = 0; i < tlen; ++i) {
+					// patch the destination
+					result[state] = stateIndices[result[state]];
+					++state;
+					var prlen = result[state++];
+					state += prlen * 2;
+				}
+			}
+			return result;
+		}
+		public static FFA FromDfaTable(int[] dfa) {
+			if (null == dfa) return null;
+			if(dfa.Length == 0) return new FFA();
+			var si = 0;
+			var states = new Dictionary<int, FFA>();
+			while (si<dfa.Length) {
+				var fa = new FFA();
+				states.Add(si, fa);
+				fa.AcceptSymbol = dfa[si++];
+				if (fa.AcceptSymbol != -1) fa.IsAccepting = true;
+				var tlen = dfa[si++];
+				for(var i = 0;i<tlen;++i) {
+					++si; // tto
+					var prlen = dfa[si++];
+					si += prlen * 2;
+                }
+			}
+			si = 0;
+			var sid = 0;
+			while (si < dfa.Length) {
+				var fa = states[si];
+				var acc = dfa[si++];
+				var tlen = dfa[si++];
+				for (var i = 0; i < tlen; ++i) {
+					var tto = dfa[si++];
+					var to = states[tto];
+					var prlen = dfa[si++];
+					for(var j=0;j<prlen;++j) {
+						var pmin = dfa[si++];
+						var pmax = dfa[si++];
+						fa.Transitions.Add(new FFATransition(pmin, pmax, to));
+					}
+				}
+				++sid;
+			}
+			return states[0];
+		}
 
 		private sealed class _FListNode
 		{

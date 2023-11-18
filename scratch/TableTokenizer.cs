@@ -2,8 +2,8 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
-
-namespace Rolex
+using Token = Rolex.Token;
+namespace scratch
 {
 
 	/// <summary>
@@ -289,6 +289,7 @@ namespace Rolex
 				++state;
 				prlen = _dfa[state];
 				++state;
+				//if (prlen == 6) System.Diagnostics.Debugger.Break();
 				for (j = 0; j < prlen; ++j)
 				{
 					pmin = _dfa[state];
