@@ -176,7 +176,7 @@ namespace Rolex
 						var symids = new int[symbolTable.Length];
 						for (var i = 0; i < symbolTable.Length; ++i)
 							symids[i] = i;
-						var blockEnds = _BuildBlockEnds(rules,ignorecase);
+						var blockEnds = _BuildBlockEnds(rules,ignorecase,inputfile);
 						var nodeFlags = _BuildNodeFlags(rules);
 						if (null != nfagraph)
 						{
@@ -404,7 +404,7 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA ParseToFA(LexRule rule,bool ignoreCase)
+		static FFA ParseToFA(LexRule rule,bool ignoreCase, string filename)
 		{
 			FFA fa;
 			if (rule.Expression.StartsWith("\""))
@@ -413,7 +413,7 @@ namespace Rolex
 				fa = FFA.Literal(UnicodeUtility.ToUtf32(pc.ParseJsonString()), rule.Id);
 			}
 			else
-				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), 0, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition);
+				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), 0, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition,filename);
 			if (!ignoreCase)
 			{
 				var ic = (bool)rule.GetAttribute("ignoreCase", false);
@@ -428,7 +428,7 @@ namespace Rolex
 			}
 			return fa;
 		}
-		static int[][] _BuildBlockEnds(IList<LexRule> rules,bool ignorecase)
+		static int[][] _BuildBlockEnds(IList<LexRule> rules,bool ignorecase, string filename)
 		{
 			int max = int.MinValue;
 			for (int ic = rules.Count, i = 0; i < ic; ++i)
@@ -462,7 +462,7 @@ namespace Rolex
 					var lr = v as LexRule;
 					if (null != lr)
 					{
-						var fa = ParseToFA(lr, ci);
+						var fa = ParseToFA(lr, ci, filename);
 					
 						fa = fa.ToMinimized();
 						result[rule.Id] = fa.ToDfaTable();
