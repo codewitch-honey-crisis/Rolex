@@ -7,6 +7,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace Rolex
 {
@@ -211,7 +212,7 @@ namespace Rolex
 							td = Deslanged.TableTokenizerTemplate.Namespaces[1].Types[0];
 							origName += td.Name;
 							td.Name = codeclass;
-							CodeGenerator.GenerateSymbolConstants(td, symbolTable);
+							_GenerateSymbolConstants(td, symbolTable);
 						}
 						CodeDomVisitor.Visit(td, (ctx) =>
 						{
@@ -294,6 +295,53 @@ namespace Rolex
 			catch { }
 			return result;
 		}
+		static string _MakeSafeName(string name)
+		{
+			var sb = new StringBuilder();
+			if (char.IsDigit(name[0]))
+				sb.Append('_');
+			for (var i = 0; i < name.Length; ++i)
+			{
+				var ch = name[i];
+				if ('_' == ch || char.IsLetterOrDigit(ch))
+					sb.Append(ch);
+				else
+					sb.Append('_');
+			}
+			return sb.ToString();
+		}
+		static string _MakeUniqueMember(CodeTypeDeclaration decl, string name)
+		{
+			var seen = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+			for (int ic = decl.Members.Count, i = 0; i < ic; i++)
+				seen.Add(decl.Members[i].Name);
+			var result = name;
+			var suffix = 2;
+			while (seen.Contains(result))
+			{
+				result = string.Concat(name, suffix.ToString());
+				++suffix;
+			}
+			return result;
+		}
+		private static void _GenerateSymbolConstants(CodeTypeDeclaration target, IList<string> symbolTable)
+		{
+			// generate symbol constants
+			for (int ic = symbolTable.Count, i = 0; i < ic; ++i)
+			{
+				var symbol = symbolTable[i];
+				if (null != symbol)
+				{
+					var s = _MakeSafeName(symbol);
+					s = _MakeUniqueMember(target, s);
+					var constField = CD.CodeDomUtility.Field(typeof(int), s, MemberAttributes.Const | MemberAttributes.Public, CD.CodeDomUtility.Literal(i));
+					target.Members.Add(constField);
+				}
+			}
+		}
+
+		private static readonly CodeAttributeDeclaration _GeneratedCodeAttribute
+			= new CodeAttributeDeclaration(CD.CodeDomUtility.Type(typeof(GeneratedCodeAttribute)), new CodeAttributeArgument(CD.CodeDomUtility.Literal("Rolex")), new CodeAttributeArgument(CD.CodeDomUtility.Literal(Assembly.GetExecutingAssembly().GetName().Version.ToString())));
 		private static void _ImportCompileUnit(CodeCompileUnit fromCcu, CodeNamespace dst)
 		{
 			CD.CodeDomVisitor.Visit(fromCcu, (ctx) =>
@@ -324,7 +372,7 @@ namespace Rolex
 				}
 				foreach (CodeTypeDeclaration type in ns.Types)
 				{
-					type.CustomAttributes.Add(CodeGenerator.GeneratedCodeAttribute);
+					type.CustomAttributes.Add(_GeneratedCodeAttribute);
 					dst.Types.Add(type);
 				}
 			}

@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="CodeDomUtility.cs" />
     <Compile Include="CodeDomVisitor.cs" />
-    <Compile Include="CodeGenerator.cs" />
     <Compile Include="FastFA.brick.cs" />
     <Compile Include="LexContext.brick.cs" />
     <Compile Include="Token.cs" />
