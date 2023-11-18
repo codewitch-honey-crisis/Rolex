@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="&quot;$(SolutionDir)Rolex.exe&quot; &quot;$(ProjectDir)Example.rl&quot; /output &quot;$(ProjectDir)ExampleTokenizer.cs&quot; /namespace Rolex /dfagraph &quot;$(ProjectDir)dfa.jpg&quot;" />
+    <Exec Command="&quot;$(SolutionDir)Rolex.exe&quot; &quot;$(ProjectDir)Example.rl&quot; /output &quot;$(ProjectDir)ExampleTokenizer.cs&quot; /namespace Rolex /nfagraph &quot;$(ProjectDir)nfa.jpg&quot; /dfagraph &quot;$(ProjectDir)dfa.jpg&quot;" />
   </Target>
 
 </Project>

@@ -465,7 +465,7 @@ namespace F
 		internal static FFA Parse(LexContext pc, int accept = -1)
 		{
 
-			FFA result = null, next = null;
+			FFA result = null, next;
 			int ich;
 			pc.EnsureStarted();
 			while (true)

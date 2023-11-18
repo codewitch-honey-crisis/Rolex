@@ -176,7 +176,7 @@ namespace Rolex
 						var symids = new int[symbolTable.Length];
 						for (var i = 0; i < symbolTable.Length; ++i)
 							symids[i] = i;
-						var blockEnds = _BuildBlockEnds(rules);
+						var blockEnds = _BuildBlockEnds(rules,ignorecase);
 						var nodeFlags = _BuildNodeFlags(rules);
 						if (null != nfagraph)
 						{
@@ -342,7 +342,7 @@ namespace Rolex
 			w.Write("Usage: "+Filename + " ");
 			w.WriteLine("<inputfile> [/output <outputfile>] [/class <codeclass>] [/namespace <codenamespace>]");
 			w.WriteLine("   [/language <codelanguage> [/external <externaltoken>] [/ignorecase] [/noshared]");
-			w.WriteLine("   [/ifstale]");
+			w.WriteLine("   [/ifstale] [/nfagraph <filename>] [/dfagraph <filename>]");
 			w.WriteLine();
 			w.WriteLine(Name + " generates a lexer/scanner/tokenizer in the target .NET language");
 			w.WriteLine();
@@ -355,6 +355,10 @@ namespace Rolex
 			w.WriteLine("   <ignorecase>    Create a case insensitive lexer - defaults to case sensitive");
 			w.WriteLine("   <noshared>      Do not generate the shared code as part of the output. Defaults to generating the shared code");
 			w.WriteLine("   <ifstale>       Only generate if the input is newer than the output");
+			w.WriteLine("   <nfagraph>      Write the NFA lexer graph to the specified image file.*");
+			w.WriteLine("   <dfagraph>      Write the DFA lexer graph to the specified image file.*");
+			w.WriteLine();
+			w.WriteLine("   * Requires GraphViz to be installed and in the PATH");
 			w.WriteLine();
 		}
 		static string _GetCodeBase()
@@ -424,7 +428,7 @@ namespace Rolex
 			}
 			return fa;
 		}
-		static int[][] _BuildBlockEnds(IList<LexRule> rules)
+		static int[][] _BuildBlockEnds(IList<LexRule> rules,bool ignorecase)
 		{
 			int max = int.MinValue;
 			for (int ic = rules.Count, i = 0; i < ic; ++i)
@@ -436,7 +440,7 @@ namespace Rolex
 			var result = new int[max + 1][];
 			for (int ic = rules.Count, i = 0; i < ic; ++i)
 			{
-				var ci = false;
+				var ci = ignorecase;
 				var rule = rules[i];
 				var ica = rule.GetAttribute("ignoreCase");
 				if (null != ica && ica is bool)

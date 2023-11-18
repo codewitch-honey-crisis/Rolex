@@ -847,16 +847,16 @@ fa.Transitions.Add(new FFATransition(trns.Min,trns.Max,trns.To));f=f.ToUpperInva
 fa.Transitions.Add(new FFATransition(trns.Min,trns.Max,trns.To));f=f.ToLowerInvariant();l=l.ToLowerInvariant();fa.Transitions.Add(new FFATransition(char.ConvertToUtf32(f,
 0),char.ConvertToUtf32(l,0),trns.To));}else{fa.Transitions.Add(new FFATransition(trns.Min,trns.Max,trns.To));}}}return result;}public static FFA Parse(IEnumerable<char>
 input,int accept=-1,int line=1,int column=1,long position=0,string fileOrUrl=null){var lc=LexContext.Create(input);lc.EnsureStarted();lc.SetLocation(line,
-column,position,fileOrUrl);var result=Parse(lc,accept);return result;}internal static FFA Parse(LexContext pc,int accept=-1){FFA result=null,next=null;
-int ich;pc.EnsureStarted();while(true){switch(pc.Current){case-1: return result;case'.':var dot=FFA.Set(new KeyValuePair<int,int>[]{new KeyValuePair<int,
-int>(0,0x10ffff)},accept);if(null==result)result=dot;else{result=FFA.Concat(new FFA[]{result,dot},accept);}pc.Advance();result=_ParseModifier(result,pc,
-accept);break;case'\\':pc.Advance();pc.Expecting();var isNot=false;switch(pc.Current){case'P':isNot=true;goto case'p';case'p':pc.Advance();pc.Expecting('{');
-var uc=new StringBuilder();int uli=pc.Line;int uco=pc.Column;long upo=pc.Position;while(-1!=pc.Advance()&&'}'!=pc.Current)uc.Append((char)pc.Current);
-pc.Expecting('}');pc.Advance();int uci=0;switch(uc.ToString()){case"Pe":uci=21;break;case"Pc":uci=19;break;case"Cc":uci=14;break;case"Sc":uci=26;break;
-case"Pd":uci=19;break;case"Nd":uci=8;break;case"Me":uci=7;break;case"Pf":uci=23;break;case"Cf":uci=15;break;case"Pi":uci=22;break;case"Nl":uci=9;break;
-case"Zl":uci=12;break;case"Ll":uci=1;break;case"Sm":uci=25;break;case"Lm":uci=3;break;case"Sk":uci=27;break;case"Mn":uci=5;break;case"Ps":uci=20;break;
-case"Lo":uci=4;break;case"Cn":uci=29;break;case"No":uci=10;break;case"Po":uci=24;break;case"So":uci=28;break;case"Zp":uci=13;break;case"Co":uci=17;break;
-case"Zs":uci=11;break;case"Mc":uci=6;break;case"Cs":uci=16;break;case"Lt":uci=2;break;case"Lu":uci=0;break;}if(isNot){next=FFA.Set(_ToPairs(CharacterClasses.UnicodeCategories[uci]),
+column,position,fileOrUrl);var result=Parse(lc,accept);return result;}internal static FFA Parse(LexContext pc,int accept=-1){FFA result=null,next;int ich;
+pc.EnsureStarted();while(true){switch(pc.Current){case-1: return result;case'.':var dot=FFA.Set(new KeyValuePair<int,int>[]{new KeyValuePair<int,int>(0,
+0x10ffff)},accept);if(null==result)result=dot;else{result=FFA.Concat(new FFA[]{result,dot},accept);}pc.Advance();result=_ParseModifier(result,pc,accept);
+break;case'\\':pc.Advance();pc.Expecting();var isNot=false;switch(pc.Current){case'P':isNot=true;goto case'p';case'p':pc.Advance();pc.Expecting('{');var
+ uc=new StringBuilder();int uli=pc.Line;int uco=pc.Column;long upo=pc.Position;while(-1!=pc.Advance()&&'}'!=pc.Current)uc.Append((char)pc.Current);pc.Expecting('}');
+pc.Advance();int uci=0;switch(uc.ToString()){case"Pe":uci=21;break;case"Pc":uci=19;break;case"Cc":uci=14;break;case"Sc":uci=26;break;case"Pd":uci=19;break;
+case"Nd":uci=8;break;case"Me":uci=7;break;case"Pf":uci=23;break;case"Cf":uci=15;break;case"Pi":uci=22;break;case"Nl":uci=9;break;case"Zl":uci=12;break;
+case"Ll":uci=1;break;case"Sm":uci=25;break;case"Lm":uci=3;break;case"Sk":uci=27;break;case"Mn":uci=5;break;case"Ps":uci=20;break;case"Lo":uci=4;break;
+case"Cn":uci=29;break;case"No":uci=10;break;case"Po":uci=24;break;case"So":uci=28;break;case"Zp":uci=13;break;case"Co":uci=17;break;case"Zs":uci=11;break;
+case"Mc":uci=6;break;case"Cs":uci=16;break;case"Lt":uci=2;break;case"Lu":uci=0;break;}if(isNot){next=FFA.Set(_ToPairs(CharacterClasses.UnicodeCategories[uci]),
 accept);}else next=FFA.Set(_ToPairs(CharacterClasses.NotUnicodeCategories[uci]),accept);break;case'd':next=FFA.Set(_ToPairs(CharacterClasses.digit),accept);
 pc.Advance();break;case'D':next=FFA.Set(_NotRanges(CharacterClasses.digit),accept);pc.Advance();break;case's':next=FFA.Set(_ToPairs(CharacterClasses.space),
 accept);pc.Advance();break;case'S':next=FFA.Set(_NotRanges(CharacterClasses.space),accept);pc.Advance();break;case'w':next=FFA.Set(_ToPairs(CharacterClasses.word),
