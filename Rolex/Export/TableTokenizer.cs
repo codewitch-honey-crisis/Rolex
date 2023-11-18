@@ -70,6 +70,7 @@ namespace Rolex
 		private long _absIndex;
 		private int _line;
 		private int _column;
+		private int _tabWidth;
 		private StringBuilder _capture = new StringBuilder();
 		private IEnumerator<char> _inner;
 		public TableTokenizerEnumerator(int[] dfa, int[][] blockEnds, int[] nodeFlags, IEnumerator<char> inner)
@@ -85,6 +86,11 @@ namespace Rolex
 			_ch = -2;
 			_token.SymbolId = -2;
 			_state = -1;
+			_tabWidth = 4;
+		}
+		public int TabWidth { 
+			get { return _tabWidth; }
+			set { if (value <= 0) { _tabWidth = 4; } else { _tabWidth = value; } } 
 		}
 		public Token Current {
 			get {
@@ -148,7 +154,7 @@ namespace Rolex
 				}
 				else if (ch1 == '\t')
 				{
-					_column = ((_column / 4) + 1) * 4;
+					_column = ((_column / _tabWidth) + 1) * _tabWidth;
 				}
 				else
 				{
