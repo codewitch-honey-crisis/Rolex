@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6680238-97D4-42C0-B738-7514A58DCDC7}"
 	ProjectSection(SolutionItems) = preProject
 		deslang.exe = deslang.exe
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

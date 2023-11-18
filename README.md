@@ -5,11 +5,3 @@ Lexical analysis is often the first stage of parsing. Before we can analyze a st
 Rolex generates lexers to make this process painless and relatively intuitive, both in terms of defining them and using them. The code Rolex generates uses a simple but reliably fast DFA algorithm. All matching is done in linear time. There are no potentially quadratic time expressions you can feed it since it doesn't backtrack. The regular expressions are simple. There are no capturing groups because they are not needed. There are no anchors because they complicate matching, and aren't very useful in tokenizers. There are no lazy expressions, but there is a facility to define multicharacter ending conditions, which is 80% of what lazy expressions are used for.
 
 The main advantage of using Rolex is speed. The generated tokenizers are very fast. The main disadvantage of using Rolex, aside from a somewhat limited regular expression syntax, is the time it can take to generate complicated lexers. Basically you pay for the performance of Rolex upfront, during the build.
-
-# FastFA
-
-A bare metal fast FA engine. Faster than my FA offering but less features
-
-# LexContext
-
-A small library to facilitate hand rolled lexing and parsing
