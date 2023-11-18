@@ -109,5 +109,3 @@ integerLiteral<id=463, priority= -50>= '(0x[0-9A-Fa-f]{1,16}|([0-9]+))([Uu][Ll]?
 floatLiteral<id=464, priority= -51>= '(([0-9]+)(\.[0-9]+)?([Ee][+-]?[0-9]+)?[DdMmFf]?)|((\.[0-9]+)([Ee][+-]?[0-9]+)?[DdMmFf]?)'
 identifier<id=425, priority= -100>= '(_|[[:IsLetter:]])(_|[[:IsLetterOrDigit:]])*'
 //identifier<id=425, priority= -100>= '[A-Z_a-z][0-9A-Z_a-z]*'
-
-

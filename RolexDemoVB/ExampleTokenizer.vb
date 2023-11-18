@@ -75,6 +75,7 @@ Namespace RolexDemoVB
         Private _absIndex As Long
         Private _line As Integer
         Private _column As Integer
+        Private _tabWidth As Integer
         Private _capture As StringBuilder = New StringBuilder()
         Private _inner As IEnumerator(Of Char)
         Public Sub New(ByVal dfa() As Integer, ByVal blockEnds()() As Integer, ByVal nodeFlags() As Integer, ByVal inner As IEnumerator(Of Char))
@@ -90,7 +91,20 @@ Namespace RolexDemoVB
             Me._ch = -2
             Me._token.SymbolId = -2
             Me._state = -1
+            Me._tabWidth = 4
         End Sub
+        Public Property TabWidth() As Integer
+            Get
+                Return Me._tabWidth
+            End Get
+            Set
+                If (value <= 0) Then
+                    Me._tabWidth = 4
+                Else
+                    Me._tabWidth = value
+                End If
+            End Set
+        End Property
         Public ReadOnly Property Current() As Token Implements IEnumerator(Of Token).Current
             Get
                 If (Me._state = -3) Then
@@ -145,9 +159,9 @@ Namespace RolexDemoVB
                         Me._column = 1
                     Else
                         If (ch1 = Global.Microsoft.VisualBasic.ChrW(9)) Then
-                            Me._column = (((Me._column / 4)  _
+                            Me._column = (((Me._column / Me._tabWidth)  _
                                         + 1)  _
-                                        * 4)
+                                        * Me._tabWidth)
                         Else
                             Me._column = (Me._column + 1)
                         End If

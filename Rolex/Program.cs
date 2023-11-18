@@ -20,6 +20,26 @@ namespace Rolex
 		{
 			return Run(args, Console.In, Console.Out, Console.Error);
 		}
+		class Reporter : IProgress<int>
+		{
+			TextWriter _output;
+			bool _dots;
+			public Reporter(TextWriter output,bool dots)
+			{
+				_output = output;
+				_dots = dots;
+
+			}
+			public void Report(int value)
+			{
+				if (_dots)
+				{
+					_output.Write(".");
+					return;
+				}
+				_WriteProgress(value, value != 0, _output);
+			}
+		}
 		public static int Run(string[] args, TextReader stdin, TextWriter stdout, TextWriter stderr)
 		{
 			// our return code
@@ -36,6 +56,7 @@ namespace Rolex
 			bool ignorecase = false;
 			bool noshared = false;
 			bool ifstale = false;
+			bool staticprogress = false;
 			// our working variables
 			TextReader input = null;
 			TextWriter output = null;
@@ -109,6 +130,9 @@ namespace Rolex
 							case "/ifstale":
 								ifstale = true;
 								break;
+							case "/staticprogress":
+								staticprogress = true;
+								break;
 
 
 							default:
@@ -150,9 +174,9 @@ namespace Rolex
 					else
 					{
 						if (null != outputfile)
-							stderr.Write("{0} is building file: {1}", Name, outputfile);
+							stderr.WriteLine("{0} is building file: {1}", Name, outputfile);
 						else
-							stderr.Write("{0} is building tokenizer.", Name);
+							stderr.WriteLine("{0} is building tokenizer.", Name);
 						input = new StreamReader(inputfile);
 						var rules = new List<LexRule>();
 						string line;
@@ -172,7 +196,7 @@ namespace Rolex
 						if (!string.IsNullOrEmpty(codenamespace))
 							cns.Name = codenamespace;
 						ccu.Namespaces.Add(cns);
-						var fa = _BuildLexer(rules, ignorecase,inputfile,true);
+						var fa = _BuildLexer(rules, ignorecase,inputfile,true,staticprogress, stderr);
 						var symbolTable = _BuildSymbolTable(rules);
 						var symids = new int[symbolTable.Length];
 						for (var i = 0; i < symbolTable.Length; ++i)
@@ -181,11 +205,13 @@ namespace Rolex
 						var nodeFlags = _BuildNodeFlags(rules);
 						if (null != nfagraph)
 						{
-							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false);
+							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false,staticprogress,TextWriter.Null);
 							fa2.RenderToFile(nfagraph);
 						}
-
-						fa = fa.ToDfa();
+						stderr.Write("Converting to DFA ");
+						
+						fa = fa.ToDfa(new Reporter(stderr,staticprogress));
+						stderr.WriteLine(" Done!");
 						if(null!=dfagraph)
 						{
 							fa.RenderToFile(dfagraph);
@@ -377,7 +403,30 @@ namespace Rolex
 				}
 			}
 		}
-
+		const char _block = '■';
+		const string _back = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+		const string _twirl = "-\\|/";
+		public static void _WriteProgressBar(int percent, bool update,TextWriter output)
+		{
+			if (update)
+				output.Write(_back);
+			output.Write("[");
+			var p = (int)((percent / 10f) + .5f);
+			for (var i = 0; i < 10; ++i)
+			{
+				if (i >= p)
+					output.Write(' ');
+				else
+					output.Write(_block);
+			}
+			output.Write("] {0,3:##0}%", percent);
+		}
+		public static void _WriteProgress(int progress, bool update, TextWriter output)
+		{
+		 	 if (update)
+				 output.Write("\b");
+			 output.Write(_twirl[progress % _twirl.Length]);
+		}
 		// do our error handling here (release builds)
 		static int _ReportError(Exception ex, TextWriter stderr)
 		{
@@ -394,17 +443,18 @@ namespace Rolex
 			w.WriteLine();
 			w.WriteLine(Name + " generates a lexer/scanner/tokenizer in the target .NET language");
 			w.WriteLine();
-			w.WriteLine("   <inputfile>     The input lexer specification");
-			w.WriteLine("   <outputfile>    The output source file - defaults to STDOUT");
-			w.WriteLine("   <codeclass>     The name of the main class to generate - default derived from <outputfile>");
-			w.WriteLine("   <codenamespace> The namespace to generate the code under - defaults to none");
-			w.WriteLine("   <codelanguage>  The .NET language to generate the code in - default derived from <outputfile>");
-			w.WriteLine("   <externaltoken> The namespace of the external token if one is to be used - default not external");
-			w.WriteLine("   <ignorecase>    Create a case insensitive lexer - defaults to case sensitive");
-			w.WriteLine("   <noshared>      Do not generate the shared code as part of the output. Defaults to generating the shared code");
-			w.WriteLine("   <ifstale>       Only generate if the input is newer than the output");
-			w.WriteLine("   <nfagraph>      Write the NFA lexer graph to the specified image file.*");
-			w.WriteLine("   <dfagraph>      Write the DFA lexer graph to the specified image file.*");
+			w.WriteLine("   <inputfile>      The input lexer specification");
+			w.WriteLine("   <outputfile>     The output source file - defaults to STDOUT");
+			w.WriteLine("   <codeclass>      The name of the main class to generate - default derived from <outputfile>");
+			w.WriteLine("   <codenamespace>  The namespace to generate the code under - defaults to none");
+			w.WriteLine("   <codelanguage>   The .NET language to generate the code in - default derived from <outputfile>");
+			w.WriteLine("   <externaltoken>  The namespace of the external token if one is to be used - default not external");
+			w.WriteLine("   <ignorecase>     Create a case insensitive lexer - defaults to case sensitive");
+			w.WriteLine("   <noshared>       Do not generate the shared code as part of the output. Defaults to generating the shared code");
+			w.WriteLine("   <ifstale>        Only generate if the input is newer than the output");
+			w.WriteLine("   <staticprogress> Do not use dynamic console features for progress indicators");
+			w.WriteLine("   <nfagraph>       Write the NFA lexer graph to the specified image file.*");
+			w.WriteLine("   <dfagraph>       Write the DFA lexer graph to the specified image file.*");
 			w.WriteLine();
 			w.WriteLine("   * Requires GraphViz to be installed and in the PATH");
 			w.WriteLine();
@@ -538,8 +588,13 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized)
+		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized, bool dots,TextWriter output)
 		{
+			output.Write("Building lexer ");
+			if (!dots)
+			{
+				_WriteProgressBar(0, false, output);
+			}
 			var exprs = new FFA[rules.Count];
 			var result = new FFA();
 			for (var i = 0; i < exprs.Length; ++i)
@@ -567,7 +622,20 @@ namespace Rolex
 						fa = FFA.CaseInsensitive(fa, rule.Id);
 				}
 				result.AddEpsilon(minimized?fa.ToMinimized():fa);
+				if (dots)
+				{
+					output.Write('.');
+				}
+				else
+				{
+					_WriteProgressBar((int)(((double)i / (double)exprs.Length) * 100), true, output);
+				}
 			}
+			if (!dots)
+			{
+				_WriteProgressBar(100, true, output);
+			}
+			output.WriteLine(" Done!");
 			return result;
 		}
 		
