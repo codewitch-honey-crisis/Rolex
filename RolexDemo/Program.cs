@@ -7,10 +7,9 @@ namespace RolexDemo
 	{
 		static void Main(string[] args)
 		{
+			// using (var sr = File.OpenText("..\\..\\Program.cs"))
+			//	input = sr.ReadToEnd();
 			var input = "base foo \"bar\" foobar  bar 123 baz -345 fubar 1foo *#( 0";
-			using (var sr = File.OpenText("..\\..\\Program.cs"))
-				input = sr.ReadToEnd();
-
 			var extokenizer = new ExampleTokenizer(input);
 			foreach(var tok in extokenizer)
 			{

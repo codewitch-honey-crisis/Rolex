@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using LC;
 using System.Diagnostics;
-using System.IO;
 using System.Collections;
 namespace F{public partial class CharacterClasses{public static int[][]UnicodeCategories=new int[][]{new int[]{65,90,192,214,216,222,256,256,258,258,260,
 260,262,262,264,264,266,266,268,268,270,270,272,272,274,274,276,276,278,278,280,280,282,282,284,284,286,286,288,288,290,290,292,292,294,294,296,296,298,
@@ -1054,7 +1054,9 @@ public static long Search(int[]dfa,LexContext lc){lc.EnsureStarted();lc.ClearCap
 var matched=false;for(var i=0;i<trns;++i){var tto=dfa[si++];var prlen=dfa[si++];for(var j=0;j<prlen;++j){var min=dfa[si++];var max=dfa[si++];if(min>lc.Current)
 {si+=(prlen-(j+1))*2;break;}if(max>=lc.Current){si=tto;matched=true;goto next_state;}}}next_state:if(!matched){if(acc!=-1&&lc.CaptureBuffer.Length>1){
 return result-1;}lc.ClearCapture();lc.Advance();result=-1;si=0;break;}if(result==-1){result=lc.Position;}lc.Capture();lc.Advance();if(lc.Current==LexContext.EndOfInput)
-{return dfa[si]!=-1?result-1:-1;}}}return dfa[0]!=-1?result-1:-1;}}}namespace F{partial class FFA{/// <summary>
+{return dfa[si]!=-1?result-1:-1;}}}return dfa[0]!=-1?result-1:-1;}public static IEnumerable<int>ToUtf32(IEnumerable<char>@string){int chh=-1;foreach(var
+ ch in@string){if(char.IsHighSurrogate(ch)){chh=ch;continue;}else chh=-1;if(-1!=chh){if(!char.IsLowSurrogate(ch))throw new IOException("Unterminated Unicode surrogate pair found in string.");
+yield return char.ConvertToUtf32(unchecked((char)chh),ch);chh=-1;continue;}yield return ch;}}}}namespace F{partial class FFA{/// <summary>
 /// Represents optional rendering parameters for a dot graph.
 /// </summary>
 public sealed class DotGraphOptions{/// <summary>

@@ -48,7 +48,6 @@
     <Compile Include="FastFA.brick.cs" />
     <Compile Include="LexContext.brick.cs" />
     <Compile Include="Token.cs" />
-    <Compile Include="UnicodeUtility.cs" />
     <Content Include="Export\TableTokenizer.cs" />
     <Content Include="Export\TableTokenizerTemplate.cs" />
     <Content Include="Export\Token.cs" />

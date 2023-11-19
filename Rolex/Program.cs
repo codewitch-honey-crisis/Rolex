@@ -508,7 +508,7 @@ namespace Rolex
 			if (rule.Expression.StartsWith("\""))
 			{
 				var pc = LexContext.Create(rule.Expression);
-				fa = FFA.Literal(UnicodeUtility.ToUtf32(pc.ParseJsonString()), rule.Id);
+				fa = FFA.Literal(FFA.ToUtf32(pc.ParseJsonString()), rule.Id);
 			}
 			else
 				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), 0, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition,filename);
@@ -549,7 +549,7 @@ namespace Rolex
 				var be = v as string;
 				if (!string.IsNullOrEmpty(be))
 				{
-					var cfa = FFA.Literal(UnicodeUtility.ToUtf32(be), 0);
+					var cfa = FFA.Literal(FFA.ToUtf32(be), 0);
 					if (ci)
 						cfa = FFA.CaseInsensitive(cfa, 0);
 					cfa = cfa.ToMinimized();
@@ -604,7 +604,7 @@ namespace Rolex
 				if(rule.Expression.StartsWith("\""))
 				{
 					var pc = LexContext.Create(rule.Expression);
-					fa = FFA.Literal(UnicodeUtility.ToUtf32(pc.ParseJsonString()),rule.Id);
+					fa = FFA.Literal(FFA.ToUtf32(pc.ParseJsonString()),rule.Id);
 				} else
 					fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), rule.Id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition, inputFile);
 				if (0 > rule.Id)
