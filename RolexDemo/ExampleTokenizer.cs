@@ -14,9 +14,9 @@ namespace RolexDemo {
     using System.Collections.Generic;
     using System.Text;
     
+    ///  <summary>
     ///  Reference implementation for generated shared code
     ///  </summary>
-    ///  <summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
     internal struct Token {
         ///  <summary>
@@ -44,9 +44,9 @@ namespace RolexDemo {
         ///  </summary>
         public string Value;
     }
+    ///  <summary>
     ///  Reference Implementation for generated shared code
     ///  </summary>
-    ///  <summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
     internal class TableTokenizer : object, IEnumerable<Token> {
         ///  <summary>
@@ -118,7 +118,6 @@ namespace RolexDemo {
     ///  <summary>
     ///  Enumerates tokens over a character enumerator
     ///  </summary>
-    ///  <summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
     internal class TableTokenizerEnumerator : object, IEnumerator<Token> {
         private int _state;
@@ -505,9 +504,9 @@ namespace RolexDemo {
             return false;
         }
     }
+    ///  <summary>
     ///  A table driven tokenizer
     ///  </summary>
-    ///  <summary>
     internal class ExampleTokenizer : TableTokenizer {
         internal static int[] DfaTable = new int[] {
                 -1,

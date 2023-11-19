@@ -435,6 +435,7 @@ namespace Rolex
 				 output.Write("\b");
 			 output.Write(_twirl[progress % _twirl.Length]);
 		}
+#if !DEBUG
 		// do our error handling here (release builds)
 		static int _ReportError(Exception ex, TextWriter stderr)
 		{
@@ -442,6 +443,7 @@ namespace Rolex
 			stderr.WriteLine("Error: {0}", ex.Message);
 			return -1;
 		}
+#endif
 		static void _PrintUsage(TextWriter w)
 		{
 			w.Write("Usage: "+Filename + " ");
