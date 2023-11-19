@@ -238,7 +238,7 @@ namespace Rolex
 							td = Deslanged.TableTokenizerTemplate.Namespaces[1].Types[0];
 							origName += td.Name;
 							td.Name = codeclass;
-							_GenerateSymbolConstants(td, symbolTable);
+							_GenerateSymbolConstants(td, rules, symbolTable);
 						}
 						CodeDomVisitor.Visit(td, (ctx) =>
 						{
@@ -350,7 +350,7 @@ namespace Rolex
 			}
 			return result;
 		}
-		private static void _GenerateSymbolConstants(CodeTypeDeclaration target, IList<string> symbolTable)
+		private static void _GenerateSymbolConstants(CodeTypeDeclaration target, IList<LexRule> rules, IList<string> symbolTable)
 		{
 			// generate symbol constants
 			for (int ic = symbolTable.Count, i = 0; i < ic; ++i)
@@ -361,6 +361,9 @@ namespace Rolex
 					var s = _MakeSafeName(symbol);
 					s = _MakeUniqueMember(target, s);
 					var constField = CD.CodeDomUtility.Field(typeof(int), s, MemberAttributes.Const | MemberAttributes.Public, CD.CodeDomUtility.Literal(i));
+					constField.Comments.AddRange(new CodeCommentStatement[] {
+						new CodeCommentStatement("<summary>Matches "+rules[i].Expression+"</summary>",true)
+					});
 					target.Members.Add(constField);
 				}
 			}
@@ -608,7 +611,9 @@ namespace Rolex
 				} else
 					fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), rule.Id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition, inputFile);
 				if (0 > rule.Id)
-					System.Diagnostics.Debugger.Break();
+				{
+					throw new InvalidOperationException(string.Format("A rule id was less than zero at line {0}", rule.ExpressionLine));
+				}
 				if (!ignoreCase)
 				{
 					var ic = (bool)rule.GetAttribute("ignoreCase", false);

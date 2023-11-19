@@ -76,6 +76,23 @@ namespace Rolex {
             result.LinePragma = linePragma;
             return result;
         }
+        private static CodeMemberProperty _MemberProperty(CodeTypeReference type, string name, MemberAttributes attributes, CodeParameterDeclarationExpression[] parameters, CodeStatement[] getStatements, CodeStatement[] setStatements, CodeTypeReference[] implementationTypes, CodeTypeReference privateImplementationType, CodeCommentStatement[] comments, CodeAttributeDeclaration[] customAttributes, CodeDirective[] startDirectives, CodeDirective[] endDirectives, CodeLinePragma linePragma) {
+            CodeMemberProperty result = new CodeMemberProperty();
+            result.Type = type;
+            result.Name = name;
+            result.Attributes = attributes;
+            result.Parameters.AddRange(parameters);
+            result.GetStatements.AddRange(getStatements);
+            result.SetStatements.AddRange(setStatements);
+            result.ImplementationTypes.AddRange(implementationTypes);
+            result.PrivateImplementationType = privateImplementationType;
+            result.Comments.AddRange(comments);
+            result.CustomAttributes.AddRange(customAttributes);
+            result.StartDirectives.AddRange(startDirectives);
+            result.EndDirectives.AddRange(endDirectives);
+            result.LinePragma = linePragma;
+            return result;
+        }
         private static CodeMemberMethod _MemberMethod(CodeTypeReference returnType, string name, MemberAttributes attributes, CodeParameterDeclarationExpression[] parameters, CodeStatement[] statements, CodeTypeReference[] implementationTypes, CodeTypeReference privateImplementationType, CodeCommentStatement[] comments, CodeAttributeDeclaration[] customAttributes, CodeAttributeDeclaration[] returnTypeCustomAttributes, CodeDirective[] startDirectives, CodeDirective[] endDirectives, CodeLinePragma linePragma) {
             CodeMemberMethod result = new CodeMemberMethod();
             result.ReturnType = returnType;
@@ -107,23 +124,6 @@ namespace Rolex {
             result.LinePragma = linePragma;
             return result;
         }
-        private static CodeMemberProperty _MemberProperty(CodeTypeReference type, string name, MemberAttributes attributes, CodeParameterDeclarationExpression[] parameters, CodeStatement[] getStatements, CodeStatement[] setStatements, CodeTypeReference[] implementationTypes, CodeTypeReference privateImplementationType, CodeCommentStatement[] comments, CodeAttributeDeclaration[] customAttributes, CodeDirective[] startDirectives, CodeDirective[] endDirectives, CodeLinePragma linePragma) {
-            CodeMemberProperty result = new CodeMemberProperty();
-            result.Type = type;
-            result.Name = name;
-            result.Attributes = attributes;
-            result.Parameters.AddRange(parameters);
-            result.GetStatements.AddRange(getStatements);
-            result.SetStatements.AddRange(setStatements);
-            result.ImplementationTypes.AddRange(implementationTypes);
-            result.PrivateImplementationType = privateImplementationType;
-            result.Comments.AddRange(comments);
-            result.CustomAttributes.AddRange(customAttributes);
-            result.StartDirectives.AddRange(startDirectives);
-            result.EndDirectives.AddRange(endDirectives);
-            result.LinePragma = linePragma;
-            return result;
-        }
         public static System.CodeDom.CodeCompileUnit TableTokenizer {
             get {
                 return Deslanged._CompileUnit(new string[] {
@@ -138,23 +138,48 @@ namespace Rolex {
                                                     new CodeTypeReference(typeof(object)),
                                                     new CodeTypeReference("IEnumerable`1", new CodeTypeReference[] {
                                                                 new CodeTypeReference("Token")})}, new CodeTypeMember[] {
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "ErrorSymbol", new CodePrimitiveExpression(-1), (MemberAttributes.Const | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), "_dfaTable", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), 1), "_blockEnds", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), "_nodeFlags", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "ErrorSymbol", new CodePrimitiveExpression(-1), (MemberAttributes.Const | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" The symbol id for an error", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), "_dfaTable", null, MemberAttributes.Private, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" our state table")}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), 1), "_blockEnds", null, MemberAttributes.Private, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" our block ends (specified like comment<blockEnd=\"*/\">=\"/*\" in a rolex spec file)" +
+                                                                        "")}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), "_nodeFlags", null, MemberAttributes.Private, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" our node flags. Currently only used for the hidden attribute")}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberField(new CodeTypeReference("IEnumerable`1", new CodeTypeReference[] {
-                                                                    new CodeTypeReference(typeof(char))}), "_input", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                    new CodeTypeReference(typeof(char))}), "_input", null, MemberAttributes.Private, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" the input cursor. We can get this from a string, a char array, or some other sou" +
+                                                                        "rce.")}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "_tabWidth", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberProperty(new CodeTypeReference(typeof(int)), "TabWidth", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"))}, new CodeStatement[] {
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), CodeBinaryOperatorType.LessThanOrEqual, new CodePrimitiveExpression(0)), new CodeStatement[] {
+                                                                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePrimitiveExpression(4))}, new CodeStatement[0]),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePropertySetValueReferenceExpression())}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the width of a tab stop", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
                                                                     new CodeTypeReference("Token")}), "GetEnumerator", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeMethodReturnStatement(new CodeObjectCreateExpression(new CodeTypeReference("TableTokenizerEnumerator"), new CodeExpression[] {
+                                                                new CodeVariableDeclarationStatement(new CodeTypeReference("TableTokenizerEnumerator"), "result", new CodeObjectCreateExpression(new CodeTypeReference("TableTokenizerEnumerator"), new CodeExpression[] {
                                                                                 new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_dfaTable"),
                                                                                 new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_blockEnds"),
                                                                                 new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_nodeFlags"),
-                                                                                new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_input"), "GetEnumerator"), new CodeExpression[0])}))}, new CodeTypeReference[] {
+                                                                                new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_input"), "GetEnumerator"), new CodeExpression[0])})),
+                                                                new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "TabWidth"), new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth")),
+                                                                new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result"))}, new CodeTypeReference[] {
                                                                 new CodeTypeReference("IEnumerable`1", new CodeTypeReference[] {
-                                                                            new CodeTypeReference("Token")})}, null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                            new CodeTypeReference("Token")})}, null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Retrieves an enumerator that can be used to iterate over the tokens", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <returns>An enumerator that can be used to iterate over the tokens</returns>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(System.Collections.IEnumerator)), "GetEnumerator", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetEnumerator"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerable)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetEnumerator"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerable)), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" legacy collection support (required)")}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._Constructor((MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[] {
                                                                 new CodeParameterDeclarationExpression(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), "dfaTable"),
                                                                 new CodeParameterDeclarationExpression(new CodeTypeReference(new CodeTypeReference(new CodeTypeReference(typeof(int)), 1), 1), "blockEnds"),
@@ -176,7 +201,17 @@ namespace Rolex {
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_dfaTable"), new CodeArgumentReferenceExpression("dfaTable")),
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_blockEnds"), new CodeArgumentReferenceExpression("blockEnds")),
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_nodeFlags"), new CodeArgumentReferenceExpression("nodeFlags")),
-                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_input"), new CodeArgumentReferenceExpression("input"))}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_input"), new CodeArgumentReferenceExpression("input"))}, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Constructs a new instance", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <param name=\"dfaTable\">The DFA state table to use</param>", true),
+                                                                new CodeCommentStatement(" <param name=\"blockEnds\">The block ends table</param>", true),
+                                                                new CodeCommentStatement(" <param name=\"nodeFlags\">The node flags table</param>", true),
+                                                                new CodeCommentStatement(" <param name=\"input\">The input character sequence</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" Reference Implementation for generated shared code", true),
+                                                    new CodeCommentStatement(" </summary>", true),
+                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                         Deslanged._TypeDeclaration("TableTokenizerEnumerator", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
                                                     new CodeTypeReference(typeof(object)),
                                                     new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
@@ -212,12 +247,22 @@ namespace Rolex {
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_ch"), new CodePrimitiveExpression(-2)),
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_token"), "SymbolId"), new CodePrimitiveExpression(-2)),
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-1)),
-                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePrimitiveExpression(4))}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePrimitiveExpression(4))}, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Constructs a new token enumerator", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <param name=\"dfa\">The DFA to use</param>", true),
+                                                                new CodeCommentStatement(" <param name=\"blockEnds\">The block end DFAs to use</param>", true),
+                                                                new CodeCommentStatement(" <param name=\"nodeFlags\">The node flags</param>", true),
+                                                                new CodeCommentStatement(" <param name=\"inner\">The character enumerator</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference(typeof(int)), "TabWidth", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"))}, new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodePropertySetValueReferenceExpression(), CodeBinaryOperatorType.LessThanOrEqual, new CodePrimitiveExpression(0)), new CodeStatement[] {
                                                                             new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePrimitiveExpression(4))}, new CodeStatement[] {
-                                                                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePropertySetValueReferenceExpression())})}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_tabWidth"), new CodePropertySetValueReferenceExpression())})}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the width of the tab stops", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference("Token"), "Current", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
@@ -227,16 +272,24 @@ namespace Rolex {
                                                                                                         new CodePrimitiveExpression("The enumerator is not positioned on an element")}))}, new CodeStatement[0])}),
                                                                 new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_token"))}, new CodeStatement[0], new CodeTypeReference[] {
                                                                 new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
-                                                                            new CodeTypeReference("Token")})}, null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                            new CodeTypeReference("Token")})}, null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the current token", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference(typeof(object)), "Current", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeMethodReturnStatement(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "Current"))}, new CodeStatement[0], new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "Current"))}, new CodeStatement[0], new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" legacy support")}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Dispose", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "Dispose"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.IDisposable)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "Dispose"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.IDisposable)), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" framework support")}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Dispose", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeMethodReturnStatement(null)}, new CodeStatement[0]),
                                                                 new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_inner"), "Dispose"), new CodeExpression[0])),
-                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-3))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-3))}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Disposes of the enumerator", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "_FetchNextInput", MemberAttributes.Private, new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodePrimitiveExpression(false), CodeBinaryOperatorType.ValueEquality, new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_inner"), "MoveNext"), new CodeExpression[0])), new CodeStatement[] {
                                                                             new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_ch"), new CodePrimitiveExpression(-1)),
@@ -271,7 +324,8 @@ namespace Rolex {
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_absIndex"), new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_absIndex"), CodeBinaryOperatorType.Add, new CodePrimitiveExpression(1))),
                                                                 new CodeMethodReturnStatement(new CodePrimitiveExpression(true))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "MoveNext", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "MoveNext"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "MoveNext"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" supports the framework")}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "MoveNext", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
@@ -289,9 +343,17 @@ namespace Rolex {
                                                                                                                             new CodeFieldReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_token"), "SymbolId")}), CodeBinaryOperatorType.BitwiseAnd, new CodePrimitiveExpression(1))), new CodeStatement[] {
                                                                                                                 new CodeMethodReturnStatement(new CodePrimitiveExpression(true))}, new CodeStatement[0])}, new CodeStatement[] {
                                                                                                     new CodeMethodReturnStatement(new CodePrimitiveExpression(true))})})}, new CodeStatement[0]),
-                                                                new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Moves to the next token", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <returns>True if successful, or false if there were not any more tokens</returns" +
+                                                                        ">", true),
+                                                                new CodeCommentStatement(" <exception cref=\"ObjectDisposedException\">Thrown if the cobject was disposed of<" +
+                                                                        "/exception>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Reset", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "Reset"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "Reset"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" supports the framework")}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Reset", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
@@ -302,25 +364,42 @@ namespace Rolex {
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_absIndex"), new CodePrimitiveExpression(0)),
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_line"), new CodePrimitiveExpression(1)),
                                                                 new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_column"), new CodePrimitiveExpression(1)),
-                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_token"), "SymbolId"), new CodePrimitiveExpression(-2))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_token"), "SymbolId"), new CodePrimitiveExpression(-2))}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Resets the enumerator", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <exception cref=\"ObjectDisposedException\">The enumerator was disposed</exception" +
+                                                                        ">", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference(typeof(long)), "AbsoluteIndex", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
                                                                                             new CodePrimitiveExpression("The enumerator was disposed")}))}, new CodeStatement[0]),
-                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_absIndex"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_absIndex"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the absolute character index of the cursor", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference(typeof(long)), "Position", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
                                                                                             new CodePrimitiveExpression("The enumerator was disposed")}))}, new CodeStatement[0]),
-                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_position"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_position"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the position of the cursor", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference(typeof(int)), "Line", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
                                                                             new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
                                                                                             new CodePrimitiveExpression("The enumerator was disposed")}))}, new CodeStatement[0]),
-                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_line"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_line"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the line of the cursor", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberProperty(new CodeTypeReference(typeof(int)), "Column", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
-                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_column"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "_Lex", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_column"))}, new CodeStatement[0], new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the column of the cursor", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "_Lex", MemberAttributes.Private, new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeVariableDeclarationStatement(new CodeTypeReference(typeof(int)), "tlen", null),
                                                                 new CodeVariableDeclarationStatement(new CodeTypeReference(typeof(int)), "tto", null),
                                                                 new CodeVariableDeclarationStatement(new CodeTypeReference(typeof(int)), "prlen", null),
@@ -457,7 +536,11 @@ namespace Rolex {
                                                                 new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_capture"), "Clear"), new CodeExpression[0])),
                                                                 new CodeConditionStatement(new CodeVariableReferenceExpression("fetch"), new CodeStatement[] {
                                                                             new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "_FetchNextInput"), new CodeExpression[0]))}, new CodeStatement[0]),
-                                                                new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
+                                                                new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" <summary>", true),
+                                                    new CodeCommentStatement(" Enumerates tokens over a character enumerator", true),
+                                                    new CodeCommentStatement(" </summary>", true),
+                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
             }
         }
         public static System.CodeDom.CodeCompileUnit TableTokenizerTemplate {
@@ -477,7 +560,14 @@ namespace Rolex {
                                                                 new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "DfaTable"),
                                                                 new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "BlockEnds"),
                                                                 new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "NodeFlags"),
-                                                                new CodeArgumentReferenceExpression("input")}, new CodeStatement[0], new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
+                                                                new CodeArgumentReferenceExpression("input")}, new CodeStatement[0], new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Constructs a new table tokenizer", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <param name=\"input\">The input character stream</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" A table driven tokenizer", true),
+                                                    new CodeCommentStatement(" </summary>", true),
+                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
             }
         }
         public static System.CodeDom.CodeCompileUnit Token {
@@ -486,12 +576,33 @@ namespace Rolex {
                             Deslanged._Namespace("", new CodeNamespaceImport[0], new CodeTypeDeclaration[0], new CodeCommentStatement[0]),
                             Deslanged._Namespace("Rolex", new CodeNamespaceImport[0], new CodeTypeDeclaration[] {
                                         Deslanged._TypeDeclaration("Token", false, false, false, true, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[0], new CodeTypeMember[] {
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "Line", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "Column", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(long)), "AbsoluteIndex", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(long)), "Position", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "SymbolId", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
-                                                    Deslanged._MemberField(new CodeTypeReference(typeof(string)), "Value", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "Line", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the line where the token occurs", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "Column", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the column where the token occurs", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(long)), "AbsoluteIndex", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the character index where the token occurs", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(long)), "Position", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the position where the token occurs", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "SymbolId", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the symbol id or -1 for the error symbol", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(string)), "Value", null, (MemberAttributes.Final | MemberAttributes. Public), new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Indicates the value of the token", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" Reference implementation for generated shared code", true),
+                                                    new CodeCommentStatement(" </summary>", true),
+                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
             }
         }
     }

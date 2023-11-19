@@ -14,28 +14,88 @@ namespace RolexDemo {
     using System.Collections.Generic;
     using System.Text;
     
+    ///  Reference implementation for generated shared code
+    ///  </summary>
+    ///  <summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
     internal struct Token {
+        ///  <summary>
+        ///  Indicates the line where the token occurs
+        ///  </summary>
         public int Line;
+        ///  <summary>
+        ///  Indicates the column where the token occurs
+        ///  </summary>
         public int Column;
+        ///  <summary>
+        ///  Indicates the character index where the token occurs
+        ///  </summary>
         public long AbsoluteIndex;
+        ///  <summary>
+        ///  Indicates the position where the token occurs
+        ///  </summary>
         public long Position;
+        ///  <summary>
+        ///  Indicates the symbol id or -1 for the error symbol
+        ///  </summary>
         public int SymbolId;
+        ///  <summary>
+        ///  Indicates the value of the token
+        ///  </summary>
         public string Value;
     }
+    ///  Reference Implementation for generated shared code
+    ///  </summary>
+    ///  <summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
     internal class TableTokenizer : object, IEnumerable<Token> {
+        ///  <summary>
+        ///  The symbol id for an error
+        ///  </summary>
         public const int ErrorSymbol = -1;
+        //  our state table
         private int[] _dfaTable;
+        //  our block ends (specified like comment<blockEnd="*/">="/*" in a rolex spec file)
         private int[][] _blockEnds;
+        //  our node flags. Currently only used for the hidden attribute
         private int[] _nodeFlags;
+        //  the input cursor. We can get this from a string, a char array, or some other source.
         private IEnumerable<char> _input;
-        public IEnumerator<Token> GetEnumerator() {
-            return new TableTokenizerEnumerator(this._dfaTable, this._blockEnds, this._nodeFlags, this._input.GetEnumerator());
+        private int _tabWidth;
+        ///  <summary>
+        ///  Indicates the width of a tab stop
+        ///  </summary>
+        public int TabWidth {
+            get {
+                return this._tabWidth;
+            }
+            set {
+                if ((this._tabWidth <= 0)) {
+                    this._tabWidth = 4;
+                }
+                this._tabWidth = value;
+            }
         }
+        ///  <summary>
+        ///  Retrieves an enumerator that can be used to iterate over the tokens
+        ///  </summary>
+        ///  <returns>An enumerator that can be used to iterate over the tokens</returns>
+        public IEnumerator<Token> GetEnumerator() {
+            TableTokenizerEnumerator result = new TableTokenizerEnumerator(this._dfaTable, this._blockEnds, this._nodeFlags, this._input.GetEnumerator());
+            result.TabWidth = this._tabWidth;
+            return result;
+        }
+        //  legacy collection support (required)
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
             return this.GetEnumerator();
         }
+        ///  <summary>
+        ///  Constructs a new instance
+        ///  </summary>
+        ///  <param name="dfaTable">The DFA state table to use</param>
+        ///  <param name="blockEnds">The block ends table</param>
+        ///  <param name="nodeFlags">The node flags table</param>
+        ///  <param name="input">The input character sequence</param>
         public TableTokenizer(int[] dfaTable, int[][] blockEnds, int[] nodeFlags, IEnumerable<char> input) {
             if ((null == dfaTable)) {
                 throw new ArgumentNullException("dfaTable");
@@ -55,6 +115,10 @@ namespace RolexDemo {
             this._input = input;
         }
     }
+    ///  <summary>
+    ///  Enumerates tokens over a character enumerator
+    ///  </summary>
+    ///  <summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
     internal class TableTokenizerEnumerator : object, IEnumerator<Token> {
         private int _state;
@@ -70,6 +134,13 @@ namespace RolexDemo {
         private int _tabWidth;
         private StringBuilder _capture = new StringBuilder();
         private IEnumerator<char> _inner;
+        ///  <summary>
+        ///  Constructs a new token enumerator
+        ///  </summary>
+        ///  <param name="dfa">The DFA to use</param>
+        ///  <param name="blockEnds">The block end DFAs to use</param>
+        ///  <param name="nodeFlags">The node flags</param>
+        ///  <param name="inner">The character enumerator</param>
         public TableTokenizerEnumerator(int[] dfa, int[][] blockEnds, int[] nodeFlags, IEnumerator<char> inner) {
             this._position = 0;
             this._line = 1;
@@ -84,6 +155,9 @@ namespace RolexDemo {
             this._state = -1;
             this._tabWidth = 4;
         }
+        ///  <summary>
+        ///  Indicates the width of the tab stops
+        ///  </summary>
         public int TabWidth {
             get {
                 return this._tabWidth;
@@ -97,6 +171,9 @@ namespace RolexDemo {
                 }
             }
         }
+        ///  <summary>
+        ///  Indicates the current token
+        ///  </summary>
         public Token Current {
             get {
                 if ((this._state == -3)) {
@@ -111,14 +188,19 @@ namespace RolexDemo {
                 return this._token;
             }
         }
+        //  legacy support
         object System.Collections.IEnumerator.Current {
             get {
                 return this.Current;
             }
         }
+        //  framework support
         void System.IDisposable.Dispose() {
             this.Dispose();
         }
+        ///  <summary>
+        ///  Disposes of the enumerator
+        ///  </summary>
         public void Dispose() {
             if ((this._state == -3)) {
                 return;
@@ -170,9 +252,15 @@ namespace RolexDemo {
             this._absIndex = (this._absIndex + 1);
             return true;
         }
+        //  supports the framework
         bool System.Collections.IEnumerator.MoveNext() {
             return this.MoveNext();
         }
+        ///  <summary>
+        ///  Moves to the next token
+        ///  </summary>
+        ///  <returns>True if successful, or false if there were not any more tokens</returns>
+        ///  <exception cref="ObjectDisposedException">Thrown if the cobject was disposed of</exception>
         public bool MoveNext() {
             if ((this._state == -3)) {
                 throw new ObjectDisposedException("The enumerator was disposed");
@@ -204,9 +292,14 @@ namespace RolexDemo {
             }
             return false;
         }
+        //  supports the framework
         void System.Collections.IEnumerator.Reset() {
             this.Reset();
         }
+        ///  <summary>
+        ///  Resets the enumerator
+        ///  </summary>
+        ///  <exception cref="ObjectDisposedException">The enumerator was disposed</exception>
         public void Reset() {
             if ((this._state == -3)) {
                 throw new ObjectDisposedException("The enumerator was disposed");
@@ -219,6 +312,9 @@ namespace RolexDemo {
             this._column = 1;
             this._token.SymbolId = -2;
         }
+        ///  <summary>
+        ///  Indicates the absolute character index of the cursor
+        ///  </summary>
         public long AbsoluteIndex {
             get {
                 if ((this._state == -3)) {
@@ -227,6 +323,9 @@ namespace RolexDemo {
                 return this._absIndex;
             }
         }
+        ///  <summary>
+        ///  Indicates the position of the cursor
+        ///  </summary>
         public long Position {
             get {
                 if ((this._state == -3)) {
@@ -235,6 +334,9 @@ namespace RolexDemo {
                 return this._position;
             }
         }
+        ///  <summary>
+        ///  Indicates the line of the cursor
+        ///  </summary>
         public int Line {
             get {
                 if ((this._state == -3)) {
@@ -243,12 +345,15 @@ namespace RolexDemo {
                 return this._line;
             }
         }
+        ///  <summary>
+        ///  Indicates the column of the cursor
+        ///  </summary>
         public int Column {
             get {
                 return this._column;
             }
         }
-        bool _Lex() {
+        private bool _Lex() {
             int tlen;
             int tto;
             int prlen;
@@ -400,6 +505,9 @@ namespace RolexDemo {
             return false;
         }
     }
+    ///  A table driven tokenizer
+    ///  </summary>
+    ///  <summary>
     internal class ExampleTokenizer : TableTokenizer {
         internal static int[] DfaTable = new int[] {
                 -1,
@@ -8696,12 +8804,20 @@ namespace RolexDemo {
                 null,
                 null,
                 null};
+        ///  <summary>
+        ///  Constructs a new table tokenizer
+        ///  </summary>
+        ///  <param name="input">The input character stream</param>
         public ExampleTokenizer(IEnumerable<char> input) : 
                 base(ExampleTokenizer.DfaTable, ExampleTokenizer.BlockEnds, ExampleTokenizer.NodeFlags, input) {
         }
+        /// <summary>Matches '"([^"]|\\.)*"'</summary>
         public const int @string = 0;
+        /// <summary>Matches 'as|base|case'</summary>
         public const int keyword = 1;
+        /// <summary>Matches '[\t\r\n\v\f ]+'</summary>
         public const int whitespace = 2;
+        /// <summary>Matches '[_[:IsLetter:]][_[:IsLetterOrDigit:]]*'</summary>
         public const int identifier = 3;
     }
 }

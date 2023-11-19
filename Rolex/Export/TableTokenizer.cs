@@ -11,6 +11,9 @@ namespace Rolex
 	/// </summary>
 	class TableTokenizer : System.Object, IEnumerable<Token>
 	{
+		/// <summary>
+		/// The symbol id for an error
+		/// </summary>
 		public const int ErrorSymbol = -1;
 		// our state table
 		private int[] _dfaTable;
@@ -20,6 +23,14 @@ namespace Rolex
 		private int[] _nodeFlags;
 		// the input cursor. We can get this from a string, a char array, or some other source.
 		private IEnumerable<char> _input;
+		private int _tabWidth;
+		/// <summary>
+		/// Indicates the width of a tab stop
+		/// </summary>
+		public int TabWidth {
+			get { return _tabWidth; }
+			set { if (_tabWidth <= 0) _tabWidth = 4; _tabWidth = value; }
+		}
 		/// <summary>
 		/// Retrieves an enumerator that can be used to iterate over the tokens
 		/// </summary>
@@ -28,7 +39,9 @@ namespace Rolex
 		{
 			// just create our table tokenizer's enumerator, passing all of the relevant stuff
 			// it's the real workhorse.
-			return new TableTokenizerEnumerator(_dfaTable, _blockEnds, _nodeFlags, _input.GetEnumerator());
+			TableTokenizerEnumerator result = new TableTokenizerEnumerator(_dfaTable, _blockEnds, _nodeFlags, _input.GetEnumerator());
+			result.TabWidth = _tabWidth;
+			return result;
 		}
 		// legacy collection support (required)
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -58,6 +71,9 @@ namespace Rolex
 			_input = input;
 		}
 	}
+	/// <summary>
+	/// Enumerates tokens over a character enumerator
+	/// </summary>
 	class TableTokenizerEnumerator : System.Object, IEnumerator<Token>
 	{
 		private int _state;
@@ -73,6 +89,13 @@ namespace Rolex
 		private int _tabWidth;
 		private StringBuilder _capture = new StringBuilder();
 		private IEnumerator<char> _inner;
+		/// <summary>
+		/// Constructs a new token enumerator
+		/// </summary>
+		/// <param name="dfa">The DFA to use</param>
+		/// <param name="blockEnds">The block end DFAs to use</param>
+		/// <param name="nodeFlags">The node flags</param>
+		/// <param name="inner">The character enumerator</param>
 		public TableTokenizerEnumerator(int[] dfa, int[][] blockEnds, int[] nodeFlags, IEnumerator<char> inner)
 		{
 			_position = 0;
@@ -88,10 +111,16 @@ namespace Rolex
 			_state = -1;
 			_tabWidth = 4;
 		}
+		/// <summary>
+		/// Indicates the width of the tab stops
+		/// </summary>
 		public int TabWidth { 
 			get { return _tabWidth; }
 			set { if (value <= 0) { _tabWidth = 4; } else { _tabWidth = value; } } 
 		}
+		/// <summary>
+		/// Indicates the current token
+		/// </summary>
 		public Token Current {
 			get {
 				if (_state == -3)
@@ -105,12 +134,16 @@ namespace Rolex
 				return _token;
 			}
 		}
+		// legacy support
 		object System.Collections.IEnumerator.Current { get { return Current; } }
-		
+		// framework support
 		void System.IDisposable.Dispose()
 		{
 			Dispose();
 		}
+		/// <summary>
+		/// Disposes of the enumerator
+		/// </summary>
 		public void Dispose()
 		{
 			if (_state == -3) return;
@@ -166,10 +199,16 @@ namespace Rolex
 			++_absIndex;
 			return true;
 		}
+		// supports the framework
 		bool System.Collections.IEnumerator.MoveNext()
 		{
 			return MoveNext();
 		}
+		/// <summary>
+		/// Moves to the next token
+		/// </summary>
+		/// <returns>True if successful, or false if there were not any more tokens</returns>
+		/// <exception cref="ObjectDisposedException">Thrown if the cobject was disposed of</exception>
 		public bool MoveNext()
 		{
 			if (_state == -3)
@@ -207,9 +246,14 @@ namespace Rolex
 			}
 			return false;
 		}
+		// supports the framework
 		void System.Collections.IEnumerator.Reset() {
 			Reset();
 		}
+		/// <summary>
+		/// Resets the enumerator
+		/// </summary>
+		/// <exception cref="ObjectDisposedException">The enumerator was disposed</exception>
 		public void Reset()
 		{
 			if (_state == -3)
@@ -224,6 +268,9 @@ namespace Rolex
 			_column = 1;
 			_token.SymbolId = -2;
 		}
+		/// <summary>
+		/// Indicates the absolute character index of the cursor
+		/// </summary>
 		public long AbsoluteIndex {
 			get {
 				if (_state == -3)
@@ -233,6 +280,9 @@ namespace Rolex
 				return _absIndex;
 			}
 		}
+		/// <summary>
+		/// Indicates the position of the cursor
+		/// </summary>
 		public long Position {
 			get {
 				if (_state == -3)
@@ -242,6 +292,9 @@ namespace Rolex
 				return _position;
 			}
 		}
+		/// <summary>
+		/// Indicates the line of the cursor
+		/// </summary>
 		public int Line {
 			get {
 				if (_state == -3)
@@ -251,10 +304,13 @@ namespace Rolex
 				return _line;
 			}
 		}
+		/// <summary>
+		/// Indicates the column of the cursor
+		/// </summary>
 		public int Column {
 			get { return _column; }
 		}
-		bool _Lex()
+		private bool _Lex()
 		{
 			int tlen;
 			int tto;
