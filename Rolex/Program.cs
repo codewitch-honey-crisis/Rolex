@@ -196,6 +196,11 @@ namespace Rolex
 						if (!string.IsNullOrEmpty(codenamespace))
 							cns.Name = codenamespace;
 						ccu.Namespaces.Add(cns);
+						var symmap = new Dictionary<int, string>();
+						for(int i = 0;i<rules.Count;++i)
+						{
+							symmap.Add(rules[i].Id, rules[i].Expression);
+						}
 						var fa = _BuildLexer(rules, ignorecase,inputfile,true,staticprogress, stderr);
 						var symbolTable = _BuildSymbolTable(rules);
 						var symids = new int[symbolTable.Length];
@@ -238,7 +243,7 @@ namespace Rolex
 							td = Deslanged.TableTokenizerTemplate.Namespaces[1].Types[0];
 							origName += td.Name;
 							td.Name = codeclass;
-							_GenerateSymbolConstants(td, rules, symbolTable);
+							_GenerateSymbolConstants(td, symmap, symbolTable);
 						}
 						CodeDomVisitor.Visit(td, (ctx) =>
 						{
@@ -350,7 +355,7 @@ namespace Rolex
 			}
 			return result;
 		}
-		private static void _GenerateSymbolConstants(CodeTypeDeclaration target, IList<LexRule> rules, IList<string> symbolTable)
+		private static void _GenerateSymbolConstants(CodeTypeDeclaration target, IDictionary<int,string> map, IList<string> symbolTable)
 		{
 			// generate symbol constants
 			for (int ic = symbolTable.Count, i = 0; i < ic; ++i)
@@ -362,7 +367,7 @@ namespace Rolex
 					s = _MakeUniqueMember(target, s);
 					var constField = CD.CodeDomUtility.Field(typeof(int), s, MemberAttributes.Const | MemberAttributes.Public, CD.CodeDomUtility.Literal(i));
 					constField.Comments.AddRange(new CodeCommentStatement[] {
-						new CodeCommentStatement("<summary>Matches "+rules[i].Expression+"</summary>",true)
+						new CodeCommentStatement("<summary>Matches "+map[i]+"</summary>",true)
 					});
 					target.Members.Add(constField);
 				}
