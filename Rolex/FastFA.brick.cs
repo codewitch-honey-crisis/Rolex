@@ -952,8 +952,8 @@ ak){pending2[c,j]=true;pending.Enqueue(new _IntPair(j,c));}else{pending2[c,k]=tr
 }static void _Init<T>(IList<T>list,int count){for(int i=0;i<count;++i){list.Add(default(T));}}private sealed class _IntPair{private readonly int n1;private
  readonly int n2;public _IntPair(int n1,int n2){this.n1=n1;this.n2=n2;}public int N1{get{return n1;}}public int N2{get{return n2;}}}private sealed class
  _FList{public int Count{get;set;}public _FListNode First{get;set;}public _FListNode Last{get;set;}public _FListNode Add(FFA q){return new _FListNode(q,
-this);}}public int[]ToDfaTable(IProgress<int>progress=null){FFA fa=this;if(!IsDeterministic){fa=this.ToMinimized(progress);}var working=new List<int>();
-var closure=new List<F.FFA>();fa.FillClosure(closure);var stateIndices=new int[closure.Count];for(var i=0;i<closure.Count;++i){var cfa=closure[i];stateIndices[i]
+this);}}public int[]ToDfaTable(IProgress<int>progress=null){FFA fa=this;if(!IsDeterministic){fa=this.ToDfa(progress);}var working=new List<int>();var closure
+=new List<F.FFA>();fa.FillClosure(closure);var stateIndices=new int[closure.Count];for(var i=0;i<closure.Count;++i){var cfa=closure[i];stateIndices[i]
 =working.Count; working.Add(cfa.IsAccepting?cfa.AcceptSymbol:-1);var itrgp=cfa.FillInputTransitionRangesGroupedByState(); working.Add(itrgp.Count);foreach
 (var itr in itrgp){ working.Add(closure.IndexOf(itr.Key)); working.Add(itr.Value.Length/2); working.AddRange(itr.Value);}}var result=working.ToArray();
 var state=0;while(state<result.Length){state++;var tlen=result[state++];for(var i=0;i<tlen;++i){ result[state]=stateIndices[result[state]];++state;var
