@@ -209,9 +209,9 @@ namespace Rolex {
                                                                 new CodeCommentStatement(" <param name=\"blockEnds\">The block ends table</param>", true),
                                                                 new CodeCommentStatement(" <param name=\"nodeFlags\">The node flags table</param>", true),
                                                                 new CodeCommentStatement(" <param name=\"input\">The input character sequence</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" <summary>", true),
                                                     new CodeCommentStatement(" Reference Implementation for generated shared code", true),
-                                                    new CodeCommentStatement(" </summary>", true),
-                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                         Deslanged._TypeDeclaration("TableTokenizerEnumerator", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
                                                     new CodeTypeReference(typeof(object)),
                                                     new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
@@ -539,8 +539,7 @@ namespace Rolex {
                                                                 new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeTypeReference[0], null, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
                                                     new CodeCommentStatement(" <summary>", true),
                                                     new CodeCommentStatement(" Enumerates tokens over a character enumerator", true),
-                                                    new CodeCommentStatement(" </summary>", true),
-                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
+                                                    new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
             }
         }
         public static System.CodeDom.CodeCompileUnit TableTokenizerTemplate {
@@ -565,9 +564,9 @@ namespace Rolex {
                                                                 new CodeCommentStatement(" Constructs a new table tokenizer", true),
                                                                 new CodeCommentStatement(" </summary>", true),
                                                                 new CodeCommentStatement(" <param name=\"input\">The input character stream</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" <summary>", true),
                                                     new CodeCommentStatement(" A table driven tokenizer", true),
-                                                    new CodeCommentStatement(" </summary>", true),
-                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
+                                                    new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
             }
         }
         public static System.CodeDom.CodeCompileUnit Token {
@@ -600,9 +599,9 @@ namespace Rolex {
                                                                 new CodeCommentStatement(" <summary>", true),
                                                                 new CodeCommentStatement(" Indicates the value of the token", true),
                                                                 new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" <summary>", true),
                                                     new CodeCommentStatement(" Reference implementation for generated shared code", true),
-                                                    new CodeCommentStatement(" </summary>", true),
-                                                    new CodeCommentStatement(" <summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
+                                                    new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0])}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0]);
             }
         }
     }
