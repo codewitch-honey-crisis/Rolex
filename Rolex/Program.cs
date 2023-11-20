@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using static F.FFA;
+using System.Diagnostics;
 
 namespace Rolex
 {
@@ -53,6 +55,7 @@ namespace Rolex
 			string externaltoken = null;
 			string nfagraph = null;
 			string dfagraph = null;
+			string graph = null;
 			bool ignorecase = false;
 			bool noshared = false;
 			bool ifstale = false;
@@ -120,6 +123,12 @@ namespace Rolex
 									throw new ArgumentException(string.Format("The parameter \"{0}\" is missing an argument", args[i].Substring(1)));
 								++i; // advance 
 								dfagraph = args[i];
+								break;
+							case "/graph":
+								if (args.Length - 1 == i) // check if we're at the end
+									throw new ArgumentException(string.Format("The parameter \"{0}\" is missing an argument", args[i].Substring(1)));
+								++i; // advance 
+								graph = args[i];
 								break;
 							case "/ignorecase":
 								ignorecase = true;
@@ -201,7 +210,8 @@ namespace Rolex
 						{
 							symmap.Add(rules[i].Id, rules[i].Expression);
 						}
-						var fa = _BuildLexer(rules, ignorecase,inputfile,true,staticprogress, stderr);
+						FFA[] lexerFas;
+						var fa = _BuildLexer(rules, ignorecase,inputfile,true,staticprogress, stderr, out lexerFas);
 						var symbolTable = _BuildSymbolTable(rules);
 						var symids = new int[symbolTable.Length];
 						for (var i = 0; i < symbolTable.Length; ++i)
@@ -210,7 +220,8 @@ namespace Rolex
 						var nodeFlags = _BuildNodeFlags(rules);
 						if (null != nfagraph)
 						{
-							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false,staticprogress,TextWriter.Null);
+							FFA[] tmpfas;
+							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false,staticprogress,TextWriter.Null,out tmpfas);
 							fa2.RenderToFile(nfagraph);
 						}
 						stderr.Write("Converting to DFA ");
@@ -220,6 +231,11 @@ namespace Rolex
 						if(null!=dfagraph)
 						{
 							fa.RenderToFile(dfagraph);
+						}
+						if(null!=graph)
+						{
+							var dopts = new DotGraphOptions();
+							_RenderDotToFile(inputfile,graph, rules,lexerFas, blockEnds,dopts);
 						}
 						int[] dfaTable = _ToDfaStateTable(fa,symids);
 						if (!noshared)
@@ -512,27 +528,27 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA ParseToFA(LexRule rule,bool ignoreCase, string filename)
+		static FFA ParseToFA(int id, LexRule rule,bool ignoreCase, string filename)
 		{
 			FFA fa;
 			if (rule.Expression.StartsWith("\""))
 			{
 				var pc = LexContext.Create(rule.Expression);
-				fa = FFA.Literal(FFA.ToUtf32(pc.ParseJsonString()), rule.Id);
+				fa = FFA.Literal(FFA.ToUtf32(pc.ParseJsonString()), id);
 			}
 			else
-				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), 0, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition,filename);
+				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition,filename);
 			if (!ignoreCase)
 			{
 				var ic = (bool)rule.GetAttribute("ignoreCase", false);
 				if (ic)
-					fa = FFA.CaseInsensitive(fa, rule.Id);
+					fa = FFA.CaseInsensitive(fa, id);
 			}
 			else
 			{
 				var ic = (bool)rule.GetAttribute("ignoreCase", true);
 				if (ic)
-					fa = FFA.CaseInsensitive(fa, rule.Id);
+					fa = FFA.CaseInsensitive(fa, id);
 			}
 			return fa;
 		}
@@ -559,9 +575,9 @@ namespace Rolex
 				var be = v as string;
 				if (!string.IsNullOrEmpty(be))
 				{
-					var cfa = FFA.Literal(FFA.ToUtf32(be), 0);
+					var cfa = FFA.Literal(FFA.ToUtf32(be), rule.Id);
 					if (ci)
-						cfa = FFA.CaseInsensitive(cfa, 0);
+						cfa = FFA.CaseInsensitive(cfa, rule.Id);
 					cfa = cfa.ToMinimized();
 					result[rule.Id] = cfa.ToDfaTable();
 				}
@@ -570,7 +586,7 @@ namespace Rolex
 					var lr = v as LexRule;
 					if (null != lr)
 					{
-						var fa = ParseToFA(lr, ci, filename);
+						var fa = ParseToFA(rule.Id,lr, ci, filename);
 					
 						fa = fa.ToMinimized();
 						result[rule.Id] = fa.ToDfaTable();
@@ -598,14 +614,14 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized, bool dots,TextWriter output)
+		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized, bool dots,TextWriter output, out FFA[] exprs)
 		{
 			output.Write("Building lexer ");
 			if (!dots)
 			{
 				_WriteProgressBar(0, false, output);
 			}
-			var exprs = new FFA[rules.Count];
+			exprs = new FFA[rules.Count];
 			var result = new FFA();
 			for (var i = 0; i < exprs.Length; ++i)
 			{
@@ -634,6 +650,7 @@ namespace Rolex
 						fa = FFA.CaseInsensitive(fa, rule.Id);
 				}
 				result.AddEpsilon(minimized?fa.ToMinimized():fa);
+				exprs[i] = fa;
 				if (dots)
 				{
 					output.Write('.');
@@ -683,6 +700,365 @@ namespace Rolex
 
 			// build the root array
 			return dfa.ToDfaTable();
+		}
+		static void _AppendRangeTo(StringBuilder builder, int[] ranges, int index)
+		{
+			var first = ranges[index];
+			var last = ranges[index + 1];
+			_AppendRangeCharTo(builder, first);
+			if (0 == last.CompareTo(first)) return;
+			if (last == first + 1) // spit out 1 length ranges as two chars
+			{
+				_AppendRangeCharTo(builder, last);
+				return;
+			}
+			builder.Append('-');
+			_AppendRangeCharTo(builder, last);
+		}
+		static void _AppendRangeCharTo(StringBuilder builder, int rangeChar)
+		{
+			switch (rangeChar)
+			{
+				case '.':
+				case '[':
+				case ']':
+				case '^':
+				case '-':
+				case '\\':
+					builder.Append('\\');
+					builder.Append(char.ConvertFromUtf32(rangeChar));
+					return;
+				case '\t':
+					builder.Append("\\t");
+					return;
+				case '\n':
+					builder.Append("\\n");
+					return;
+				case '\r':
+					builder.Append("\\r");
+					return;
+				case '\0':
+					builder.Append("\\0");
+					return;
+				case '\f':
+					builder.Append("\\f");
+					return;
+				case '\v':
+					builder.Append("\\v");
+					return;
+				case '\b':
+					builder.Append("\\b");
+					return;
+				default:
+					var s = char.ConvertFromUtf32(rangeChar);
+					if (!char.IsLetterOrDigit(s, 0) && !char.IsSeparator(s, 0) && !char.IsPunctuation(s, 0) && !char.IsSymbol(s, 0))
+					{
+						if (s.Length == 1)
+						{
+							builder.Append("\\u");
+							builder.Append(unchecked((ushort)rangeChar).ToString("x4"));
+						}
+						else
+						{
+							builder.Append("\\U");
+							builder.Append(rangeChar.ToString("x8"));
+						}
+
+					}
+					else
+						builder.Append(s);
+					break;
+			}
+		}
+		static KeyValuePair<int, int>[] _ToPairs(int[] packedRanges)
+		{
+			var result = new KeyValuePair<int, int>[packedRanges.Length / 2];
+			for (var i = 0; i < result.Length; ++i)
+			{
+				var j = i * 2;
+				result[i] = new KeyValuePair<int, int>(packedRanges[j], packedRanges[j + 1]);
+			}
+			return result;
+		}
+		static IEnumerable<KeyValuePair<int, int>> _NotRanges(IEnumerable<KeyValuePair<int, int>> ranges)
+		{
+			// expects ranges to be normalized
+			var last = 0x10ffff;
+			using (var e = ranges.GetEnumerator())
+			{
+				if (!e.MoveNext())
+				{
+					yield return new KeyValuePair<int, int>(0x0, 0x10ffff);
+					yield break;
+				}
+				if (e.Current.Key > 0)
+				{
+					yield return new KeyValuePair<int, int>(0, unchecked(e.Current.Key - 1));
+					last = e.Current.Value;
+					if (0x10ffff <= last)
+						yield break;
+				}
+				else if (e.Current.Key == 0)
+				{
+					last = e.Current.Value;
+					if (0x10ffff <= last)
+						yield break;
+				}
+				while (e.MoveNext())
+				{
+					if (0x10ffff <= last)
+						yield break;
+					if (unchecked(last + 1) < e.Current.Key)
+						yield return new KeyValuePair<int, int>(unchecked(last + 1), unchecked((e.Current.Key - 1)));
+					last = e.Current.Value;
+				}
+				if (0x10ffff > last)
+					yield return new KeyValuePair<int, int>(unchecked((last + 1)), 0x10ffff);
+
+			}
+
+		}
+		static int[] _FromPairs(IList<KeyValuePair<int, int>> pairs)
+		{
+			var result = new int[pairs.Count * 2];
+			for (int ic = pairs.Count, i = 0; i < ic; ++i)
+			{
+				var pair = pairs[i];
+				var j = i * 2;
+				result[j] = pair.Key;
+				result[j + 1] = pair.Value;
+			}
+			return result;
+		}
+		static string _EscapeLabel(string label)
+		{
+			if (string.IsNullOrEmpty(label)) return label;
+
+			string result = label.Replace("\\", @"\\");
+			result = result.Replace("\"", "\\\"");
+			result = result.Replace("\n", "\\n");
+			result = result.Replace("\r", "\\r");
+			result = result.Replace("\0", "\\0");
+			result = result.Replace("\v", "\\v");
+			result = result.Replace("\t", "\\t");
+			result = result.Replace("\f", "\\f");
+			return result;
+		}
+		static void _RenderFsmTo(FFA fa, string name, int startingIndex, string spfx, bool hideAccept, bool hideAcceptingId, TextWriter writer)
+		{
+			var closure = fa.FillClosure();
+			var finals = new List<FFA>();
+			var accepting = FFA.FillAcceptingStates(closure);
+			foreach (var ffa in closure)
+				if (ffa.IsFinal && !ffa.IsAccepting)
+					finals.Add(ffa);
+			int i = 0;
+			foreach (var ffa in closure)
+			{
+				if (!finals.Contains(ffa))
+				{
+					if (ffa.IsAccepting)
+						accepting.Add(ffa);
+				}
+				var rngGrps = ffa.FillInputTransitionRangesGroupedByState();
+				foreach (var rngGrp in rngGrps)
+				{
+					var di = closure.IndexOf(rngGrp.Key);
+					writer.Write(name);
+					writer.Write(i);
+					writer.Write("->");
+					writer.Write(name);
+					writer.Write(di.ToString());
+					writer.Write(" [label=\"");
+					var sb = new StringBuilder();
+					IList<KeyValuePair<int, int>> rngs = _ToPairs(rngGrp.Value);
+					var nrngs = new List<KeyValuePair<int, int>>(_NotRanges(rngs));
+					var isNot = false;
+					if (nrngs.Count < rngs.Count || (nrngs.Count == rngs.Count && 0x10ffff == rngs[rngs.Count - 1].Value))
+					{
+						isNot = true;
+						if (0 != nrngs.Count)
+						{
+							sb.Append("^");
+						}
+						else
+						{
+							sb.Append(".");
+						}
+						rngs = nrngs;
+					}
+					var rpairs = _FromPairs(rngs);
+					for (var r = 0; r < rpairs.Length; r += 2)
+						_AppendRangeTo(sb, rpairs, r);
+					if (isNot || sb.Length != 1 || (char.IsWhiteSpace(sb.ToString(), 0)))
+					{
+						writer.Write('[');
+						writer.Write(_EscapeLabel(sb.ToString()));
+						writer.Write(']');
+					}
+					else
+						writer.Write(_EscapeLabel(sb.ToString()));
+					writer.WriteLine("\"]");
+				}
+
+				++i;
+			}
+
+			i = 0;
+			foreach (var ffa in closure)
+			{
+				writer.Write(name);
+				writer.Write(i);
+				writer.Write(" [");
+
+				writer.Write("label=<");
+				writer.Write("<TABLE BORDER=\"0\"><TR><TD>");
+				writer.Write(spfx);
+				writer.Write("<SUB>");
+				writer.Write(i+startingIndex);
+				writer.Write("</SUB></TD></TR>");
+
+
+				if (!hideAcceptingId && ffa.IsAccepting)
+				{
+					writer.Write("<TR><TD>");
+					writer.Write(Convert.ToString(ffa.AcceptSymbol).Replace("\"", "&quot;"));
+					writer.Write("</TD></TR>");
+
+				}
+				writer.Write("</TABLE>");
+				writer.Write(">");
+				bool isfinal = false;
+				if (!hideAccept && ( accepting.Contains(ffa) || (isfinal = finals.Contains(ffa))))
+					writer.Write(",shape=doublecircle");
+				if (isfinal)
+				{
+
+					writer.Write(",color=gray");
+
+				}
+				writer.WriteLine("]");
+				++i;
+			}
+			string delim = "";
+			if (!hideAccept && 0 < accepting.Count)
+			{
+				foreach (var ntfa in accepting)
+				{
+					writer.Write(delim);
+					writer.Write(name);
+					writer.Write(closure.IndexOf(ntfa));
+					delim = ",";
+				}
+				writer.WriteLine(" [shape=doublecircle]");
+			}
+
+			delim = "";
+			if (0 < finals.Count)
+			{
+				foreach (var ntfa in finals)
+				{
+					writer.Write(delim);
+					writer.Write(name);
+					writer.Write(closure.IndexOf(ntfa));
+					delim = ",";
+				}
+				if (hideAccept)
+				{
+					writer.WriteLine(" [shape=circle,color=gray]");
+				}
+				else
+				{
+					writer.WriteLine(" [shape=doublecircle,color=gray]");
+				}
+			}
+
+		}
+		static void _RenderRuleTo(LexRule rule,FFA fa, FFA blockEnd,  TextWriter writer, DotGraphOptions options = null)
+		{
+			if (null == options) options = new DotGraphOptions();
+			string spfx = (null == options.StatePrefix ? "q" : options.StatePrefix);
+			
+			var name = _MakeSafeName(rule.Symbol);
+			writer.WriteLine("subgraph \""+_MakeSafeName(rule.Symbol)+"\" {");
+			writer.WriteLine("rankdir=LR;");
+			writer.WriteLine("node [shape=circle];");
+			writer.WriteLine("label=\"" + _EscapeLabel(rule.Symbol) + "\";");
+			if (blockEnd == null)
+			{
+				_RenderFsmTo(fa, name,0,spfx, false, false, writer);
+			}
+			else
+			{
+				_RenderFsmTo(fa, name,0,spfx, true, true, writer);
+				var cl = fa.FillClosure();
+				var acl = fa.FillAcceptingStates();
+				foreach(var afa in acl)
+				{
+					writer.Write(name + cl.IndexOf(afa).ToString() + "->");
+					writer.Write(name + "BlockEnd0 [label=\"\\.\\*\\?");
+					writer.WriteLine("\", style=dashed, color=grey]");
+				}
+				_RenderFsmTo(blockEnd, name+"BlockEnd",cl.Count, spfx, false, false, writer);
+			}
+			writer.WriteLine("}");
+		}
+		static void _RenderDotGraph(string inputfile,IList<LexRule> rules,FFA[] fas,int[][] blockEnds, DotGraphOptions options, TextWriter writer)
+		{
+			//writer = Console.Out;
+			writer.WriteLine("digraph " + Path.GetFileNameWithoutExtension(inputfile) + " {");
+			writer.WriteLine("rankdir=LR");
+			writer.WriteLine("node [shape=circle]");
+			var i = 0;
+			foreach (var rule in rules)
+			{
+				var fa = fas[i];
+				_RenderRuleTo(rule, fa, FFA.FromDfaTable(blockEnds[rule.Id]), writer, options);
+				++i;
+			}
+			writer.WriteLine("}");
+				
+		}
+		static void _RenderDotToFile(string inputfile,string filename,IList<LexRule> rules, FFA[] fas, int[][] blockEnds, DotGraphOptions options = null)
+		{
+			if (null == options)
+				options = new DotGraphOptions();
+			string args = "-T";
+			string ext = Path.GetExtension(filename);
+			if (0 == string.Compare(".dot", ext, StringComparison.InvariantCultureIgnoreCase))
+			{
+				using (var writer = new StreamWriter(filename, false))
+				{
+					_RenderDotGraph(inputfile, rules,fas,blockEnds,options, writer);
+					return;
+				}
+			}
+			else if (0 == string.Compare(".png", ext, StringComparison.InvariantCultureIgnoreCase))
+				args += "png";
+			else if (0 == string.Compare(".jpg", ext, StringComparison.InvariantCultureIgnoreCase))
+				args += "jpg";
+			else if (0 == string.Compare(".bmp", ext, StringComparison.InvariantCultureIgnoreCase))
+				args += "bmp";
+			else if (0 == string.Compare(".svg", ext, StringComparison.InvariantCultureIgnoreCase))
+				args += "svg";
+			if (0 < options.Dpi)
+				args += " -Gdpi=" + options.Dpi.ToString();
+
+			args += " -o\"" + filename + "\"";
+
+			var psi = new ProcessStartInfo("dot", args)
+			{
+				CreateNoWindow = true,
+				UseShellExecute = false,
+				RedirectStandardInput = true
+			};
+			using (var proc = Process.Start(psi))
+			{
+				_RenderDotGraph(inputfile, rules, fas, blockEnds, options, proc.StandardInput);
+				proc.StandardInput.Close();
+				proc.WaitForExit();
+			}
+
 		}
 	}
 

@@ -805,12 +805,17 @@ Transitions=new List<FFATransition>();public FFA(bool isAccepting,int acceptSymb
  bool IsFinal{get{return 0==Transitions.Count;}}public void AddEpsilon(FFA to){if(to.IsAccepting&&!IsAccepting){IsAccepting=true;AcceptSymbol=to.AcceptSymbol;
 }for(int ic=to.Transitions.Count,i=0;i<ic;++i){Transitions.Add(to.Transitions[i]);}IsDeterministic=false;}public IList<FFA>FillClosure(IList<FFA>result
 =null){if(null==result)result=new List<FFA>();if(result.Contains(this))return result;result.Add(this);for(int ic=Transitions.Count,i=0;i<ic;++i){var t
-=Transitions[i];t.To.FillClosure(result);}return result;}public IList<FFA>FillAcceptingStates(IList<FFA>result=null){return FillAcceptingStates(FillClosure(),
-result);}public static IList<FFA>FillAcceptingStates(IList<FFA>closure,IList<FFA>result=null){if(null==result)result=new List<FFA>();for(int ic=closure.Count,
-i=0;i<ic;++i){var fa=closure[i];if(fa.IsAccepting)result.Add(fa);}return result;}public IDictionary<FFA,int[]>FillInputTransitionRangesGroupedByState(IDictionary<FFA,
-int[]>result=null){var working=new Dictionary<FFA,List<KeyValuePair<int,int>>>();foreach(var trns in Transitions){List<KeyValuePair<int,int>>l;if(!working.TryGetValue(trns.To,
-out l)){l=new List<KeyValuePair<int,int>>();working.Add(trns.To,l);}l.Add(new KeyValuePair<int,int>(trns.Min,trns.Max));}if(null==result)result=new Dictionary<FFA,
-int[]>();foreach(var item in working){item.Value.Sort((x,y)=>{var c=x.Key.CompareTo(y.Key);if(0!=c)return c;return x.Value.CompareTo(y.Value);});_NormalizeSortedRangeList(item.Value);
+=Transitions[i];t.To.FillClosure(result);}return result;}public FFA ClonePathTo(FFA to){var closure=FillClosure();var nclosure=new FFA[closure.Count];
+for(var i=0;i<nclosure.Length;i++){nclosure[i]=new FFA(closure[i].IsAccepting,closure[i].AcceptSymbol);nclosure[i].Tag=closure[i].Tag;}for(var i=0;i<nclosure.Length;
+i++){var t=nclosure[i].Transitions;foreach(var trns in closure[i].Transitions){if(trns.To.FillClosure().Contains(to)){var id=closure.IndexOf(trns.To);
+t.Add(new FFATransition(trns.Min,trns.Max,nclosure[id]));}}}return nclosure[0];}public int[]MarkPathTo(FFA to){var closure=FillClosure();var result=new
+ List<int>(closure.Count);for(int i=0;i<closure.Count;++i){var fa=closure[i];if(fa.FillClosure().Contains(to)){result.Add(i);}}return result.ToArray();
+}public IList<FFA>FillAcceptingStates(IList<FFA>result=null){return FillAcceptingStates(FillClosure(),result);}public static IList<FFA>FillAcceptingStates(IList<FFA>
+closure,IList<FFA>result=null){if(null==result)result=new List<FFA>();for(int ic=closure.Count,i=0;i<ic;++i){var fa=closure[i];if(fa.IsAccepting)result.Add(fa);
+}return result;}public IDictionary<FFA,int[]>FillInputTransitionRangesGroupedByState(IDictionary<FFA,int[]>result=null){var working=new Dictionary<FFA,
+List<KeyValuePair<int,int>>>();foreach(var trns in Transitions){List<KeyValuePair<int,int>>l;if(!working.TryGetValue(trns.To,out l)){l=new List<KeyValuePair<int,
+int>>();working.Add(trns.To,l);}l.Add(new KeyValuePair<int,int>(trns.Min,trns.Max));}if(null==result)result=new Dictionary<FFA,int[]>();foreach(var item
+ in working){item.Value.Sort((x,y)=>{var c=x.Key.CompareTo(y.Key);if(0!=c)return c;return x.Value.CompareTo(y.Value);});_NormalizeSortedRangeList(item.Value);
 result.Add(item.Key,_FromPairs(item.Value));}return result;}static void _NormalizeSortedRangeList(IList<KeyValuePair<int,int>>pairs){var or=default(KeyValuePair<int,
 int>);for(int i=1;i<pairs.Count;++i){if(pairs[i-1].Value+1>=pairs[i].Key){var nr=new KeyValuePair<int,int>(pairs[i-1].Key,pairs[i].Value);pairs[i-1]=or
 =nr;pairs.RemoveAt(i);--i;}}}public FFA Clone(){return Clone(FillClosure());}public static FFA Clone(IList<FFA>closure){var nclosure=new FFA[closure.Count];
@@ -1071,8 +1076,8 @@ public string StatePrefix{get;set;}="q";public bool HideAcceptSymbolIds{get;set;
 /// <param name="closure">The closure of all states</param>
 /// <param name="writer">The writer</param>
 /// <param name="options">A <see cref="DotGraphOptions"/> instance with any options, or null to use the defaults</param>
-static void _WriteDotTo(IList<FFA>closure,TextWriter writer,DotGraphOptions options=null){if(null==options)options=new DotGraphOptions();string spfx=null
-==options.StatePrefix?"q":options.StatePrefix;writer.WriteLine("digraph FFA {");writer.WriteLine("rankdir=LR");writer.WriteLine("node [shape=circle]");
+static void _WriteDotTo(IList<FFA>closure,TextWriter writer,DotGraphOptions options=null){if(null==options)options=new DotGraphOptions();string spfx=(null
+==options.StatePrefix?"q":options.StatePrefix);writer.WriteLine("digraph FFA {");writer.WriteLine("rankdir=LR");writer.WriteLine("node [shape=circle]");
 var finals=new List<FFA>();var accepting=closure[0].FillAcceptingStates();foreach(var ffa in closure)if(ffa.IsFinal&&!ffa.IsAccepting)finals.Add(ffa);
 int i=0;foreach(var ffa in closure){if(!finals.Contains(ffa)){if(ffa.IsAccepting)accepting.Add(ffa);}var rngGrps=ffa.FillInputTransitionRangesGroupedByState();
 foreach(var rngGrp in rngGrps){var di=closure.IndexOf(rngGrp.Key);writer.Write(spfx);writer.Write(i);writer.Write("->");writer.Write(spfx);writer.Write(di.ToString());
@@ -1092,18 +1097,20 @@ delim=",";}writer.WriteLine(" [shape=doublecircle,color=gray]");}writer.WriteLin
 /// <param name="filename">The output filename. The format to render is indicated by the file extension.</param>
 /// <param name="options">A <see cref="DotGraphOptions"/> instance with any options, or null to use the defaults</param>
 public void RenderToFile(string filename,DotGraphOptions options=null){if(null==options)options=new DotGraphOptions();string args="-T";string ext=Path.GetExtension(filename);
-if(0==string.Compare(".png",ext,StringComparison.InvariantCultureIgnoreCase))args+="png";else if(0==string.Compare(".jpg",ext,StringComparison.InvariantCultureIgnoreCase))
+if(0==string.Compare(".dot",ext,StringComparison.InvariantCultureIgnoreCase)){using(var writer=new StreamWriter(filename,false)){WriteDotTo(writer,options);
+return;}}else if(0==string.Compare(".png",ext,StringComparison.InvariantCultureIgnoreCase))args+="png";else if(0==string.Compare(".jpg",ext,StringComparison.InvariantCultureIgnoreCase))
 args+="jpg";else if(0==string.Compare(".bmp",ext,StringComparison.InvariantCultureIgnoreCase))args+="bmp";else if(0==string.Compare(".svg",ext,StringComparison.InvariantCultureIgnoreCase))
 args+="svg";if(0<options.Dpi)args+=" -Gdpi="+options.Dpi.ToString();args+=" -o\""+filename+"\"";var psi=new ProcessStartInfo("dot",args){CreateNoWindow
 =true,UseShellExecute=false,RedirectStandardInput=true};using(var proc=Process.Start(psi)){WriteDotTo(proc.StandardInput,options);proc.StandardInput.Close();
 proc.WaitForExit();}}public void WriteDotTo(TextWriter writer,DotGraphOptions options=null){_WriteDotTo(FillClosure(),writer,options);}/// <summary>
 /// Renders Graphviz output for this machine to a stream
 /// </summary>
-/// <param name="format">The output format. The format to render can be any supported dot output format. See dot command line documation for details.</param>
+/// <param name="format">The output format. The format to render can be any supported dot output format or "dot" to render a dot file. See dot command line documation for details.</param>
 /// <param name="copy">True to copy the stream, otherwise false</param>
 /// <param name="options">A <see cref="DotGraphOptions"/> instance with any options, or null to use the defaults</param>
 /// <returns>A stream containing the output. The caller is expected to close the stream when finished.</returns>
-public Stream RenderToStream(string format,bool copy=false,DotGraphOptions options=null){if(null==options)options=new DotGraphOptions();string args="-T";
+public Stream RenderToStream(string format,bool copy=false,DotGraphOptions options=null){if(null==options)options=new DotGraphOptions();if(0==string.Compare(format,"dot",StringComparison.InvariantCultureIgnoreCase))
+{var stm=new MemoryStream();using(var writer=new StreamWriter(stm)){WriteDotTo(writer,options);stm.Seek(0,SeekOrigin.Begin);return stm;}}string args="-T";
 args+=string.Concat(" ",format);if(0<options.Dpi)args+=" -Gdpi="+options.Dpi.ToString();var psi=new ProcessStartInfo("dot",args){CreateNoWindow=true,UseShellExecute
 =false,RedirectStandardInput=true,RedirectStandardOutput=true};using(var proc=Process.Start(psi)){WriteDotTo(proc.StandardInput,options);proc.StandardInput.Close();
 if(!copy)return proc.StandardOutput.BaseStream;else{var stm=new MemoryStream();proc.StandardOutput.BaseStream.CopyTo(stm);proc.StandardOutput.BaseStream.Close();
