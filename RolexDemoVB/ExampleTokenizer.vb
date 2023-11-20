@@ -47,6 +47,131 @@ Namespace RolexDemoVB
         ''' </summary>
         Public Value As String
     End Structure
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    Friend Class TextReaderEnumerator
+        Inherits [Object]
+        Implements IEnumerator(Of Char)
+        Private _state As Integer
+        Private _current As Char
+        Private _reader As TextReader
+        Friend Sub New(ByVal reader As TextReader)
+            MyBase.New
+            Me._reader = reader
+            Me._state = -1
+        End Sub
+        ''' <summary>
+        ''' Gets the current character under the cursor
+        ''' </summary>
+        ''' <exception cref="ObjectDisposedException">The enumerator is disposed</exception>
+        Public ReadOnly Property Current() As Char Implements IEnumerator(Of Char).Current
+            Get
+                If (Me._state = -3) Then
+                    Throw New ObjectDisposedException("The enumerator was disposed")
+                End If
+                If ((Me._state = -1)  _
+                            OrElse (Me._state = -2)) Then
+                    Throw New InvalidOperationException("The enumerator is not positioned on an element.")
+                End If
+                Return Me._current
+            End Get
+        End Property
+        ReadOnly Property System_Collections_IEnumerator_Current() As Object Implements System.Collections.IEnumerator.Current
+            Get
+                Return Me.Current
+            End Get
+        End Property
+        ''' <summary>
+        ''' Disposes of the enumerator
+        ''' </summary>
+        Public Sub Dispose()
+            If (Me._state = -3) Then
+                Return
+            End If
+            Me._state = -3
+        End Sub
+        Sub IDisposable_Dispose() Implements IDisposable.Dispose
+            Me.Dispose
+        End Sub
+        ''' <summary>
+        ''' Moves to the next element
+        ''' </summary>
+        ''' <returns>True if successful, false if no more data</returns>
+        ''' <exception cref="ObjectDisposedException">The enumerator was disposed</exception>
+        Public Function MoveNext() As Boolean
+            If (Me._state = -3) Then
+                Throw New ObjectDisposedException("The enumerator was disposed")
+            End If
+            If (Me._state = -2) Then
+                Return false
+            End If
+            Dim i As Integer = Me._reader.Read
+            If (i = -1) Then
+                Me._state = -2
+                Return false
+            End If
+            Me._state = 0
+            Me._current = System.Convert.ToChar(i)
+            Return true
+        End Function
+        Function System_Collections_IEnumerator_MoveNext() As Boolean Implements System.Collections.IEnumerator.MoveNext
+            Return Me.MoveNext
+        End Function
+        ''' <summary>
+        ''' Resets the enumerator
+        ''' </summary>
+        ''' <remarks>Not supported</remarks>
+        ''' <exception cref="ObjectDisposedException">The enumerator is disposed</exception>
+        ''' <exception cref="NotSupportedException">The operation is not supported (always throws)</exception>
+        Public Sub Reset()
+            If (Me._state = -3) Then
+                Throw New ObjectDisposedException("The enumerator was disposed")
+            End If
+            If (Me._state = -1) Then
+                Return
+            End If
+            Throw New NotSupportedException()
+        End Sub
+        Sub System_Collections_IEnumerator_Reset() Implements System.Collections.IEnumerator.Reset
+            Me.Reset
+        End Sub
+    End Class
+    ''' <summary>
+    ''' Gets an enumerable instance over a TextReader
+    ''' </summary>
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    Friend Class TextReaderEnumerable
+        Inherits [Object]
+        Implements IEnumerable(Of Char)
+        Private _reader As TextReader
+        Private _state As Integer
+        ''' <summary>
+        ''' Creates a new instance
+        ''' </summary>
+        ''' <param name="reader">The TextReader</param>
+        Public Sub New(ByVal reader As TextReader)
+            MyBase.New
+            Me._reader = reader
+            Me._state = -1
+        End Sub
+        ''' <summary>
+        ''' Gets the enumerator
+        ''' </summary>
+        ''' <remarks>This can only be called once</remarks>
+        ''' <returns></returns>
+        ''' <exception cref="InvalidOperationException"></exception>
+        Public Function GetEnumerator() As IEnumerator(Of Char) Implements IEnumerable(Of Char).GetEnumerator
+            If (false  _
+                        = (Me._state = -1)) Then
+                Throw New InvalidOperationException("The collection cannot be enumerated more than once.")
+            End If
+            Dim result As TextReaderEnumerator = New TextReaderEnumerator(Me._reader)
+            Me._state = 0
+            Return result
+        End Function
+        Function System_Collections_IEnumerable_GetEnumerator() As System.Collections.IEnumerator Implements System.Collections.IEnumerable.GetEnumerator
+            Return Me.GetEnumerator
+        End Function
+    End Class
     ''' <summary>
     ''' Reference Implementation for generated shared code
     ''' </summary>

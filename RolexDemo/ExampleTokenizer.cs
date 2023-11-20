@@ -44,6 +44,125 @@ namespace RolexDemo {
         ///  </summary>
         public string Value;
     }
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    internal class TextReaderEnumerator : Object, IEnumerator<char> {
+        private int _state;
+        private char _current;
+        private TextReader _reader;
+        internal TextReaderEnumerator(TextReader reader) {
+            this._reader = reader;
+            this._state = -1;
+        }
+        ///  <summary>
+        ///  Gets the current character under the cursor
+        ///  </summary>
+        ///  <exception cref="ObjectDisposedException">The enumerator is disposed</exception>
+        public char Current {
+            get {
+                if ((this._state == -3)) {
+                    throw new ObjectDisposedException("The enumerator was disposed");
+                }
+                if (((this._state == -1) 
+                            || (this._state == -2))) {
+                    throw new InvalidOperationException("The enumerator is not positioned on an element.");
+                }
+                return this._current;
+            }
+        }
+        object System.Collections.IEnumerator.Current {
+            get {
+                return this.Current;
+            }
+        }
+        ///  <summary>
+        ///  Disposes of the enumerator
+        ///  </summary>
+        public void Dispose() {
+            if ((this._state == -3)) {
+                return;
+            }
+            this._state = -3;
+        }
+        void IDisposable.Dispose() {
+            this.Dispose();
+        }
+        ///  <summary>
+        ///  Moves to the next element
+        ///  </summary>
+        ///  <returns>True if successful, false if no more data</returns>
+        ///  <exception cref="ObjectDisposedException">The enumerator was disposed</exception>
+        public bool MoveNext() {
+            if ((this._state == -3)) {
+                throw new ObjectDisposedException("The enumerator was disposed");
+            }
+            if ((this._state == -2)) {
+                return false;
+            }
+            int i = this._reader.Read();
+            if ((i == -1)) {
+                this._state = -2;
+                return false;
+            }
+            this._state = 0;
+            this._current = System.Convert.ToChar(i);
+            return true;
+        }
+        bool System.Collections.IEnumerator.MoveNext() {
+            return this.MoveNext();
+        }
+        ///  <summary>
+        ///  Resets the enumerator
+        ///  </summary>
+        ///  <remarks>Not supported</remarks>
+        ///  <exception cref="ObjectDisposedException">The enumerator is disposed</exception>
+        ///  <exception cref="NotSupportedException">The operation is not supported (always throws)</exception>
+        public void Reset() {
+            if ((this._state == -3)) {
+                throw new ObjectDisposedException("The enumerator was disposed");
+            }
+            if ((this._state == -1)) {
+                return;
+            }
+            throw new NotSupportedException();
+        }
+        void System.Collections.IEnumerator.Reset() {
+            this.Reset();
+        }
+    }
+    ///  <summary>
+    ///  Gets an enumerable instance over a TextReader
+    ///  </summary>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    internal class TextReaderEnumerable : Object, IEnumerable<char> {
+        private TextReader _reader;
+        private int _state;
+        ///  <summary>
+        ///  Creates a new instance
+        ///  </summary>
+        ///  <param name="reader">The TextReader</param>
+        public TextReaderEnumerable(TextReader reader) {
+            this._reader = reader;
+            this._state = -1;
+        }
+        ///  <summary>
+        ///  Gets the enumerator
+        ///  </summary>
+        ///  <remarks>This can only be called once</remarks>
+        ///  <returns></returns>
+        ///  <exception cref="InvalidOperationException"></exception>
+        public IEnumerator<char> GetEnumerator() {
+            if ((false 
+                        == (this._state == -1))) {
+                throw new InvalidOperationException("The collection cannot be enumerated more than once.");
+            }
+            TextReaderEnumerator result = new TextReaderEnumerator(this._reader);
+            this._state = 0;
+            return result;
+        }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
+            return this.GetEnumerator();
+        }
+    }
     ///  <summary>
     ///  Reference Implementation for generated shared code
     ///  </summary>

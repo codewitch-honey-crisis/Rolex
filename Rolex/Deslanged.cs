@@ -76,6 +76,20 @@ namespace Rolex {
             result.LinePragma = linePragma;
             return result;
         }
+        private static CodeConstructor _Constructor(MemberAttributes attributes, CodeParameterDeclarationExpression[] parameters, CodeExpression[] chainedConstructorArgs, CodeExpression[] baseConstructorArgs, CodeStatement[] statements, CodeCommentStatement[] comments, CodeAttributeDeclaration[] customAttributes, CodeDirective[] startDirectives, CodeDirective[] endDirectives, CodeLinePragma linePragma) {
+            CodeConstructor result = new CodeConstructor();
+            result.Attributes = attributes;
+            result.Parameters.AddRange(parameters);
+            result.ChainedConstructorArgs.AddRange(chainedConstructorArgs);
+            result.BaseConstructorArgs.AddRange(baseConstructorArgs);
+            result.Statements.AddRange(statements);
+            result.Comments.AddRange(comments);
+            result.CustomAttributes.AddRange(customAttributes);
+            result.StartDirectives.AddRange(startDirectives);
+            result.EndDirectives.AddRange(endDirectives);
+            result.LinePragma = linePragma;
+            return result;
+        }
         private static CodeMemberProperty _MemberProperty(CodeTypeReference type, string name, MemberAttributes attributes, CodeParameterDeclarationExpression[] parameters, CodeStatement[] getStatements, CodeStatement[] setStatements, CodeTypeReference[] implementationTypes, CodeTypeReference privateImplementationType, CodeCommentStatement[] comments, CodeAttributeDeclaration[] customAttributes, CodeDirective[] startDirectives, CodeDirective[] endDirectives, CodeLinePragma linePragma) {
             CodeMemberProperty result = new CodeMemberProperty();
             result.Type = type;
@@ -110,20 +124,6 @@ namespace Rolex {
             result.LinePragma = linePragma;
             return result;
         }
-        private static CodeConstructor _Constructor(MemberAttributes attributes, CodeParameterDeclarationExpression[] parameters, CodeExpression[] chainedConstructorArgs, CodeExpression[] baseConstructorArgs, CodeStatement[] statements, CodeCommentStatement[] comments, CodeAttributeDeclaration[] customAttributes, CodeDirective[] startDirectives, CodeDirective[] endDirectives, CodeLinePragma linePragma) {
-            CodeConstructor result = new CodeConstructor();
-            result.Attributes = attributes;
-            result.Parameters.AddRange(parameters);
-            result.ChainedConstructorArgs.AddRange(chainedConstructorArgs);
-            result.BaseConstructorArgs.AddRange(baseConstructorArgs);
-            result.Statements.AddRange(statements);
-            result.Comments.AddRange(comments);
-            result.CustomAttributes.AddRange(customAttributes);
-            result.StartDirectives.AddRange(startDirectives);
-            result.EndDirectives.AddRange(endDirectives);
-            result.LinePragma = linePragma;
-            return result;
-        }
         public static System.CodeDom.CodeCompileUnit TableTokenizer {
             get {
                 return Deslanged._CompileUnit(new string[] {
@@ -134,6 +134,118 @@ namespace Rolex {
                                         new CodeNamespaceImport("System.Collections.Generic"),
                                         new CodeNamespaceImport("System.Text")}, new CodeTypeDeclaration[0], new CodeCommentStatement[0]),
                             Deslanged._Namespace("Rolex", new CodeNamespaceImport[0], new CodeTypeDeclaration[] {
+                                        Deslanged._TypeDeclaration("TextReaderEnumerator", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
+                                                    new CodeTypeReference("Object"),
+                                                    new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
+                                                                new CodeTypeReference(typeof(char))})}, new CodeTypeMember[] {
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "_state", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(char)), "_current", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference("TextReader"), "_reader", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._Constructor(MemberAttributes.FamilyAndAssembly, new CodeParameterDeclarationExpression[] {
+                                                                new CodeParameterDeclarationExpression(new CodeTypeReference("TextReader"), "reader")}, new CodeExpression[0], new CodeExpression[0], new CodeStatement[] {
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_reader"), new CodeArgumentReferenceExpression("reader")),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-1))}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberProperty(new CodeTypeReference(typeof(char)), "Current", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
+                                                                            new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
+                                                                                            new CodePrimitiveExpression("The enumerator was disposed")}))}, new CodeStatement[0]),
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-1)), CodeBinaryOperatorType.BooleanOr, new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-2))), new CodeStatement[] {
+                                                                            new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("InvalidOperationException"), new CodeExpression[] {
+                                                                                            new CodePrimitiveExpression("The enumerator is not positioned on an element.")}))}, new CodeStatement[0]),
+                                                                new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_current"))}, new CodeStatement[0], new CodeTypeReference[] {
+                                                                new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
+                                                                            new CodeTypeReference(typeof(char))})}, null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Gets the current character under the cursor", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <exception cref=\"ObjectDisposedException\">The enumerator is disposed</exception>" +
+                                                                        "", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberProperty(new CodeTypeReference(typeof(object)), "Current", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeMethodReturnStatement(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "Current"))}, new CodeStatement[0], new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Dispose", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
+                                                                            new CodeMethodReturnStatement(null)}, new CodeStatement[0]),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-3))}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Disposes of the enumerator", true),
+                                                                new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Dispose", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "Dispose"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference("IDisposable"), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "MoveNext", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
+                                                                            new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
+                                                                                            new CodePrimitiveExpression("The enumerator was disposed")}))}, new CodeStatement[0]),
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-2)), new CodeStatement[] {
+                                                                            new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeStatement[0]),
+                                                                new CodeVariableDeclarationStatement(new CodeTypeReference(typeof(int)), "i", new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_reader"), "Read"), new CodeExpression[0])),
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression("i"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-1)), new CodeStatement[] {
+                                                                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-2)),
+                                                                            new CodeMethodReturnStatement(new CodePrimitiveExpression(false))}, new CodeStatement[0]),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(0)),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_current"), new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference(typeof(System.Convert))), "ToChar"), new CodeExpression[] {
+                                                                                new CodeVariableReferenceExpression("i")})),
+                                                                new CodeMethodReturnStatement(new CodePrimitiveExpression(true))}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Moves to the next element", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <returns>True if successful, false if no more data</returns>", true),
+                                                                new CodeCommentStatement(" <exception cref=\"ObjectDisposedException\">The enumerator was disposed</exception" +
+                                                                        ">", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(bool)), "MoveNext", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "MoveNext"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Reset", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-3)), new CodeStatement[] {
+                                                                            new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("ObjectDisposedException"), new CodeExpression[] {
+                                                                                            new CodePrimitiveExpression("The enumerator was disposed")}))}, new CodeStatement[0]),
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-1)), new CodeStatement[] {
+                                                                            new CodeMethodReturnStatement(null)}, new CodeStatement[0]),
+                                                                new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("NotSupportedException"), new CodeExpression[0]))}, new CodeTypeReference[0], null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Resets the enumerator", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <remarks>Not supported</remarks>", true),
+                                                                new CodeCommentStatement(" <exception cref=\"ObjectDisposedException\">The enumerator is disposed</exception>" +
+                                                                        "", true),
+                                                                new CodeCommentStatement(" <exception cref=\"NotSupportedException\">The operation is not supported (always t" +
+                                                                        "hrows)</exception>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(void)), "Reset", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "Reset"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerator)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                        Deslanged._TypeDeclaration("TextReaderEnumerable", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
+                                                    new CodeTypeReference("Object"),
+                                                    new CodeTypeReference("IEnumerable`1", new CodeTypeReference[] {
+                                                                new CodeTypeReference(typeof(char))})}, new CodeTypeMember[] {
+                                                    Deslanged._MemberField(new CodeTypeReference("TextReader"), "_reader", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberField(new CodeTypeReference(typeof(int)), "_state", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._Constructor((MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[] {
+                                                                new CodeParameterDeclarationExpression(new CodeTypeReference("TextReader"), "reader")}, new CodeExpression[0], new CodeExpression[0], new CodeStatement[] {
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_reader"), new CodeArgumentReferenceExpression("reader")),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(-1))}, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Creates a new instance", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <param name=\"reader\">The TextReader</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
+                                                                    new CodeTypeReference(typeof(char))}), "GetEnumerator", (MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodePrimitiveExpression(false), CodeBinaryOperatorType.ValueEquality, new CodeBinaryOperatorExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression(-1))), new CodeStatement[] {
+                                                                            new CodeThrowExceptionStatement(new CodeObjectCreateExpression(new CodeTypeReference("InvalidOperationException"), new CodeExpression[] {
+                                                                                            new CodePrimitiveExpression("The collection cannot be enumerated more than once.")}))}, new CodeStatement[0]),
+                                                                new CodeVariableDeclarationStatement(new CodeTypeReference("TextReaderEnumerator"), "result", new CodeObjectCreateExpression(new CodeTypeReference("TextReaderEnumerator"), new CodeExpression[] {
+                                                                                new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_reader")})),
+                                                                new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_state"), new CodePrimitiveExpression(0)),
+                                                                new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result"))}, new CodeTypeReference[] {
+                                                                new CodeTypeReference("IEnumerable`1", new CodeTypeReference[] {
+                                                                            new CodeTypeReference(typeof(char))})}, null, new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Gets the enumerator", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <remarks>This can only be called once</remarks>", true),
+                                                                new CodeCommentStatement(" <returns></returns>", true),
+                                                                new CodeCommentStatement(" <exception cref=\"InvalidOperationException\"></exception>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._MemberMethod(new CodeTypeReference(typeof(System.Collections.IEnumerator)), "GetEnumerator", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
+                                                                new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetEnumerator"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerable)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
+                                                    new CodeCommentStatement(" <summary>", true),
+                                                    new CodeCommentStatement(" Gets an enumerable instance over a TextReader", true),
+                                                    new CodeCommentStatement(" </summary>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                         Deslanged._TypeDeclaration("TableTokenizer", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
                                                     new CodeTypeReference(typeof(object)),
                                                     new CodeTypeReference("IEnumerable`1", new CodeTypeReference[] {
