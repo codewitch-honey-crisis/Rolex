@@ -8936,6 +8936,13 @@ namespace RolexDemo {
         public ExampleTokenizer(IEnumerable<char> input) : 
                 base(ExampleTokenizer.DfaTable, ExampleTokenizer.BlockEnds, ExampleTokenizer.NodeFlags, input) {
         }
+        ///  <summary>
+        ///  Constructs a new table tokenizer
+        ///  </summary>
+        ///  <param name="input">The input character stream</param>
+        public ExampleTokenizer(TextReader input) : 
+                base(ExampleTokenizer.DfaTable, ExampleTokenizer.BlockEnds, ExampleTokenizer.NodeFlags, new TextReaderEnumerable(input)) {
+        }
         /// <summary>Matches '"([^"]|\\.)*"'</summary>
         public const int @string = 0;
         /// <summary>Matches 'as|base|case'</summary>

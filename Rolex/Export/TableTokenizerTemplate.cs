@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.IO;
+using System.Collections.Generic;
 
 namespace Rolex
 {
@@ -16,6 +17,14 @@ namespace Rolex
 		/// <param name="input">The input character stream</param>
 		public TableTokenizerTemplate(IEnumerable<char> input) :
 			   base(DfaTable, BlockEnds, NodeFlags, input)
+		{
+		}
+		/// <summary>
+		/// Constructs a new table tokenizer
+		/// </summary>
+		/// <param name="input">The input character stream</param>
+		public TableTokenizerTemplate(TextReader input) :
+			   base(DfaTable, BlockEnds, NodeFlags, new TextReaderEnumerable(input))
 		{
 		}
 	}

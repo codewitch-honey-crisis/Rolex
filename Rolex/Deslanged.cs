@@ -661,6 +661,7 @@ namespace Rolex {
             get {
                 return Deslanged._CompileUnit(new string[0], new CodeNamespace[] {
                             Deslanged._Namespace("", new CodeNamespaceImport[] {
+                                        new CodeNamespaceImport("System.IO"),
                                         new CodeNamespaceImport("System.Collections.Generic")}, new CodeTypeDeclaration[0], new CodeCommentStatement[0]),
                             Deslanged._Namespace("Rolex", new CodeNamespaceImport[0], new CodeTypeDeclaration[] {
                                         Deslanged._TypeDeclaration("TableTokenizerTemplate", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
@@ -675,6 +676,17 @@ namespace Rolex {
                                                                 new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "BlockEnds"),
                                                                 new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "NodeFlags"),
                                                                 new CodeArgumentReferenceExpression("input")}, new CodeStatement[0], new CodeCommentStatement[] {
+                                                                new CodeCommentStatement(" <summary>", true),
+                                                                new CodeCommentStatement(" Constructs a new table tokenizer", true),
+                                                                new CodeCommentStatement(" </summary>", true),
+                                                                new CodeCommentStatement(" <param name=\"input\">The input character stream</param>", true)}, new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                    Deslanged._Constructor((MemberAttributes.Final | MemberAttributes. Public), new CodeParameterDeclarationExpression[] {
+                                                                new CodeParameterDeclarationExpression(new CodeTypeReference("TextReader"), "input")}, new CodeExpression[0], new CodeExpression[] {
+                                                                new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "DfaTable"),
+                                                                new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "BlockEnds"),
+                                                                new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(new CodeTypeReference("Rolex.TableTokenizerTemplate")), "NodeFlags"),
+                                                                new CodeObjectCreateExpression(new CodeTypeReference("TextReaderEnumerable"), new CodeExpression[] {
+                                                                            new CodeArgumentReferenceExpression("input")})}, new CodeStatement[0], new CodeCommentStatement[] {
                                                                 new CodeCommentStatement(" <summary>", true),
                                                                 new CodeCommentStatement(" Constructs a new table tokenizer", true),
                                                                 new CodeCommentStatement(" </summary>", true),

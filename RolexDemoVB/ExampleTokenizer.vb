@@ -656,6 +656,13 @@ Namespace RolexDemoVB
         Public Sub New(ByVal input As IEnumerable(Of Char))
             MyBase.New(ExampleTokenizer.DfaTable, ExampleTokenizer.BlockEnds, ExampleTokenizer.NodeFlags, input)
         End Sub
+        ''' <summary>
+        ''' Constructs a new table tokenizer
+        ''' </summary>
+        ''' <param name="input">The input character stream</param>
+        Public Sub New(ByVal input As TextReader)
+            MyBase.New(ExampleTokenizer.DfaTable, ExampleTokenizer.BlockEnds, ExampleTokenizer.NodeFlags, New TextReaderEnumerable(input))
+        End Sub
         '''<summary>Matches '"([^"]|\\.)*"'</summary>
         Public Const [string] As Integer = 0
         '''<summary>Matches 'as|base|case'</summary>
