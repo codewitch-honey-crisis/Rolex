@@ -10,7 +10,7 @@ Module Module1
 			Dim extokenizer As New RolexDemoVB.ExampleTokenizer(col)
 			For Each tok In extokenizer
 				If (-1 <> tok.SymbolId) Then
-					Console.WriteLine("{0}: {1} at column {2}", tok.SymbolId, tok.Value, tok.Column)
+					Console.WriteLine("{0}: {1} at line {2}, column {3}", tok.SymbolId, tok.Value, tok.Line, tok.Column)
 				End If
 			Next
 		End Using

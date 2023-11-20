@@ -148,8 +148,8 @@ namespace RolexDemo {
         ///  Gets the enumerator
         ///  </summary>
         ///  <remarks>This can only be called once</remarks>
-        ///  <returns></returns>
-        ///  <exception cref="InvalidOperationException"></exception>
+        ///  <returns>A new enumerator</returns>
+        ///  <exception cref="InvalidOperationException">The operation cannot be done more than once</exception>
         public IEnumerator<char> GetEnumerator() {
             if ((false 
                         == (this._state == -1))) {
@@ -341,7 +341,6 @@ namespace RolexDemo {
                     throw new IOException("The stream is not valid Unicode");
                 }
                 this._absIndex = (this._absIndex + 1);
-                this._column = (this._column + 1);
                 this._ch = char.ConvertToUtf32(ch1, ch2);
             }
             else {
@@ -355,9 +354,11 @@ namespace RolexDemo {
                     }
                     else {
                         if ((ch1 == '\t')) {
-                            this._column = (((this._column / this._tabWidth) 
+                            this._column = (((((this._column - 1) 
+                                        / this._tabWidth) 
                                         + 1) 
-                                        * this._tabWidth);
+                                        * this._tabWidth) 
+                                        + 1);
                         }
                         else {
                             this._column = (this._column + 1);
@@ -483,7 +484,13 @@ namespace RolexDemo {
             int acc;
             long cursor_pos = this._position;
             int line = this._line;
-            int column = this._column;
+            int column;
+            if ((this._absIndex == 0)) {
+                column = this._column;
+            }
+            else {
+                column = (this._column - 1);
+            }
             long absi = this._absIndex;
             if ((this._ch == -2)) {
                 this._FetchNextInput();

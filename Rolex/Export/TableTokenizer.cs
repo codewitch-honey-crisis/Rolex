@@ -303,7 +303,6 @@ namespace Rolex
 					throw new IOException("The stream is not valid Unicode");
 				}
 				++_absIndex;
-				++_column;
 				_ch = char.ConvertToUtf32(ch1, ch2);
 			}
 			else
@@ -319,7 +318,7 @@ namespace Rolex
 				}
 				else if (ch1 == '\t')
 				{
-					_column = ((_column / _tabWidth) + 1) * _tabWidth;
+					_column = ((((_column - 1) / _tabWidth) + 1) * _tabWidth) + 1;
 				}
 				else
 				{
@@ -455,7 +454,15 @@ namespace Rolex
 			int acc;
 			long cursor_pos = _position;
 			int line = _line;
-			int column = _column;
+			int column;
+			if (_absIndex == 0)
+			{
+				column = _column;
+			}
+			else
+			{
+				column = _column - 1;
+			}
 			long absi = _absIndex;
 			if (_ch == -2)
 			{

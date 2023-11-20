@@ -354,7 +354,6 @@ Namespace RolexDemoVB
                     Throw New IOException("The stream is not valid Unicode")
                 End If
                 Me._absIndex = (Me._absIndex + 1)
-                Me._column = (Me._column + 1)
                 Me._ch = Char.ConvertToUtf32(ch1, ch2)
             Else
                 If (ch1 = Global.Microsoft.VisualBasic.ChrW(13)) Then
@@ -365,9 +364,11 @@ Namespace RolexDemoVB
                         Me._column = 1
                     Else
                         If (ch1 = Global.Microsoft.VisualBasic.ChrW(9)) Then
-                            Me._column = (((Me._column / Me._tabWidth)  _
+                            Me._column = (((((Me._column - 1)  _
+                                        / Me._tabWidth)  _
                                         + 1)  _
-                                        * Me._tabWidth)
+                                        * Me._tabWidth)  _
+                                        + 1)
                         Else
                             Me._column = (Me._column + 1)
                         End If
@@ -490,7 +491,12 @@ Namespace RolexDemoVB
             Dim acc As Integer
             Dim cursor_pos As Long = Me._position
             Dim line As Integer = Me._line
-            Dim column As Integer = Me._column
+            Dim column As Integer
+            If (Me._absIndex = 0) Then
+                column = Me._column
+            Else
+                column = (Me._column - 1)
+            End If
             Dim absi As Long = Me._absIndex
             If (Me._ch = -2) Then
                 Me._FetchNextInput
