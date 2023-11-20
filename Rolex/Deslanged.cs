@@ -239,8 +239,9 @@ namespace Rolex {
                                                                 new CodeCommentStatement(" Gets the enumerator", true),
                                                                 new CodeCommentStatement(" </summary>", true),
                                                                 new CodeCommentStatement(" <remarks>This can only be called once</remarks>", true),
-                                                                new CodeCommentStatement(" <returns></returns>", true),
-                                                                new CodeCommentStatement(" <exception cref=\"InvalidOperationException\"></exception>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
+                                                                new CodeCommentStatement(" <returns>A new enumerator</returns>", true),
+                                                                new CodeCommentStatement(" <exception cref=\"InvalidOperationException\">The operation cannot be done more th" +
+                                                                        "an once</exception>", true)}, new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
                                                     Deslanged._MemberMethod(new CodeTypeReference(typeof(System.Collections.IEnumerator)), "GetEnumerator", ((MemberAttributes)(0)), new CodeParameterDeclarationExpression[0], new CodeStatement[] {
                                                                 new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetEnumerator"), new CodeExpression[0]))}, new CodeTypeReference[0], new CodeTypeReference(typeof(System.Collections.IEnumerable)), new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null)}, new CodeCommentStatement[] {
                                                     new CodeCommentStatement(" <summary>", true),

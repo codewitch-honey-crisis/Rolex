@@ -120,8 +120,8 @@ namespace Rolex
 		/// Gets the enumerator
 		/// </summary>
 		/// <remarks>This can only be called once</remarks>
-		/// <returns></returns>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <returns>A new enumerator</returns>
+		/// <exception cref="InvalidOperationException">The operation cannot be done more than once</exception>
 		public IEnumerator<char> GetEnumerator()
 		{
 			if (_state != -1)
