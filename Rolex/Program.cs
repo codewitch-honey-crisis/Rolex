@@ -465,7 +465,7 @@ namespace Rolex
 			w.Write("Usage: "+Filename + " ");
 			w.WriteLine("<inputfile> [/output <outputfile>] [/class <codeclass>] [/namespace <codenamespace>]");
 			w.WriteLine("   [/language <codelanguage> [/external <externaltoken>] [/ignorecase] [/noshared]");
-			w.WriteLine("   [/ifstale] [/nfagraph <filename>] [/dfagraph <filename>]");
+			w.WriteLine("   [/ifstale] [/nfagraph <dfafile>] [/dfagraph <nfafile>] [/graph <graphfile>]");
 			w.WriteLine();
 			w.WriteLine(Name + " generates a lexer/scanner/tokenizer in the target .NET language");
 			w.WriteLine();
@@ -479,8 +479,9 @@ namespace Rolex
 			w.WriteLine("   <noshared>       Do not generate the shared code as part of the output. Defaults to generating the shared code");
 			w.WriteLine("   <ifstale>        Only generate if the input is newer than the output");
 			w.WriteLine("   <staticprogress> Do not use dynamic console features for progress indicators");
-			w.WriteLine("   <nfagraph>       Write the NFA lexer graph to the specified image file.*");
-			w.WriteLine("   <dfagraph>       Write the DFA lexer graph to the specified image file.*");
+			w.WriteLine("   <nfafile>        Write the NFA lexer graph to the specified image file.*");
+			w.WriteLine("   <dfafile>        Write the DFA lexer graph to the specified image file.*");
+			w.WriteLine("   <graphfile>      Write all the individual rule DFAs to a graph.*");
 			w.WriteLine();
 			w.WriteLine("   * Requires GraphViz to be installed and in the PATH");
 			w.WriteLine();
@@ -974,14 +975,13 @@ namespace Rolex
 			}
 
 		}
-		static void _RenderRuleTo(LexRule rule,FFA fa, FFA blockEnd,  TextWriter writer, DotGraphOptions options = null)
+		static void _RenderRuleTo(int index,LexRule rule,FFA fa, FFA blockEnd,  TextWriter writer, DotGraphOptions options = null)
 		{
 			if (null == options) options = new DotGraphOptions();
 			string spfx = (null == options.StatePrefix ? "q" : options.StatePrefix);
 			
 			var name = _MakeSafeName(rule.Symbol);
-			writer.WriteLine("subgraph \""+_MakeSafeName(rule.Symbol)+"\" {");
-			writer.WriteLine("rankdir=LR;");
+			writer.WriteLine("subgraph cluster_"+index.ToString()+" {");
 			writer.WriteLine("node [shape=circle];");
 			writer.WriteLine("label=\"" + _EscapeLabel(rule.Symbol) + "\";");
 			if (blockEnd == null)
@@ -1013,7 +1013,7 @@ namespace Rolex
 			foreach (var rule in rules)
 			{
 				var fa = fas[i];
-				_RenderRuleTo(rule, fa, FFA.FromDfaTable(blockEnds[rule.Id]), writer, options);
+				_RenderRuleTo(i,rule, fa, FFA.FromDfaTable(blockEnds[rule.Id]), writer, options);
 				++i;
 			}
 			writer.WriteLine("}");

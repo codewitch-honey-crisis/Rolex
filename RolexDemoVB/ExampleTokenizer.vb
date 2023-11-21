@@ -20,7 +20,7 @@ Namespace RolexDemoVB
     ''' <summary>
     ''' Reference implementation for generated shared code
     ''' </summary>
-    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")>  _
     Friend Structure Token
         ''' <summary>
         ''' Indicates the line where the token occurs
@@ -47,7 +47,7 @@ Namespace RolexDemoVB
         ''' </summary>
         Public Value As String
     End Structure
-    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")>  _
     Friend Class TextReaderEnumerator
         Inherits [Object]
         Implements IEnumerator(Of Char)
@@ -138,7 +138,7 @@ Namespace RolexDemoVB
     ''' <summary>
     ''' Gets an enumerable instance over a TextReader
     ''' </summary>
-    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")>  _
     Friend Class TextReaderEnumerable
         Inherits [Object]
         Implements IEnumerable(Of Char)
@@ -175,7 +175,7 @@ Namespace RolexDemoVB
     ''' <summary>
     ''' Reference Implementation for generated shared code
     ''' </summary>
-    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")>  _
     Friend Class TableTokenizer
         Inherits Object
         Implements IEnumerable(Of Token)
@@ -249,7 +249,7 @@ Namespace RolexDemoVB
     ''' <summary>
     ''' Enumerates tokens over a character enumerator
     ''' </summary>
-    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")>  _
+    <System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")>  _
     Friend Class TableTokenizerEnumerator
         Inherits Object
         Implements IEnumerator(Of Token)
