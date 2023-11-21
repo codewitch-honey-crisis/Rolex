@@ -1031,12 +1031,11 @@ namespace Rolex
 			writer.WriteLine("digraph " + Path.GetFileNameWithoutExtension(inputfile) + " {");
 			writer.WriteLine("rankdir=LR");
 			writer.WriteLine("node [shape=circle]");
-			var i = 0;
-			foreach (var rule in rules)
+			
+			for (var i = rules.Count - 1; i >= 0; --i)
 			{
 				var fa = fas[i];
-				_RenderRuleTo(i,rule, fa, FFA.FromDfaTable(blockEnds[rule.Id]), writer, options);
-				++i;
+				_RenderRuleTo(i, rules[i], fa, FFA.FromDfaTable(blockEnds[rules[i].Id]), writer, options);
 			}
 			writer.WriteLine("}");
 				
