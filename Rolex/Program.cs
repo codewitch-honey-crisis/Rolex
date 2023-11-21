@@ -34,7 +34,7 @@ namespace Rolex
 			}
 			public void Report(int value)
 			{
-				if (_dots)
+				if (_dots && 0==(value % 10))
 				{
 					_output.Write(".");
 					return;
@@ -63,6 +63,7 @@ namespace Rolex
 			// our working variables
 			TextReader input = null;
 			TextWriter output = null;
+			bool parsedArgs = false;
 			try
 			{
 				if (0 == args.Length)
@@ -148,6 +149,7 @@ namespace Rolex
 								throw new ArgumentException(string.Format("Unknown switch {0}", args[i]));
 						}
 					}
+					parsedArgs = true;
 					// now build it
 					if (string.IsNullOrEmpty(codeclass))
 					{
@@ -316,7 +318,14 @@ namespace Rolex
 #if !DEBUG
 			catch (Exception ex)
 			{
-				result = _ReportError(ex, stderr);
+				if (parsedArgs)
+				{
+					result = -1;
+				}
+				else
+				{
+					result = _ReportError(ex, stderr);
+				}
 			}
 #endif
 			finally

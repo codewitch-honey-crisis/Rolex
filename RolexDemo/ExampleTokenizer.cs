@@ -17,7 +17,7 @@ namespace RolexDemo {
     ///  <summary>
     ///  Reference implementation for generated shared code
     ///  </summary>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")]
     internal struct Token {
         ///  <summary>
         ///  Indicates the line where the token occurs
@@ -44,7 +44,7 @@ namespace RolexDemo {
         ///  </summary>
         public string Value;
     }
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")]
     internal class TextReaderEnumerator : Object, IEnumerator<char> {
         private int _state;
         private char _current;
@@ -132,7 +132,7 @@ namespace RolexDemo {
     ///  <summary>
     ///  Gets an enumerable instance over a TextReader
     ///  </summary>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")]
     internal class TextReaderEnumerable : Object, IEnumerable<char> {
         private TextReader _reader;
         private int _state;
@@ -166,7 +166,7 @@ namespace RolexDemo {
     ///  <summary>
     ///  Reference Implementation for generated shared code
     ///  </summary>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")]
     internal class TableTokenizer : object, IEnumerable<Token> {
         ///  <summary>
         ///  The symbol id for an error
@@ -237,7 +237,7 @@ namespace RolexDemo {
     ///  <summary>
     ///  Enumerates tokens over a character enumerator
     ///  </summary>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.8.0.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Rolex", "0.9.0.0")]
     internal class TableTokenizerEnumerator : object, IEnumerator<Token> {
         private int _state;
         private Token _token;
