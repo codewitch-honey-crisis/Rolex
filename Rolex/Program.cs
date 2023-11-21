@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using static F.FFA;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Rolex
 {
@@ -60,6 +61,7 @@ namespace Rolex
 			bool noshared = false;
 			bool ifstale = false;
 			bool staticprogress = false;
+			int dpi = 0;
 			// our working variables
 			TextReader input = null;
 			TextWriter output = null;
@@ -145,15 +147,28 @@ namespace Rolex
 							case "/staticprogress":
 								staticprogress = true;
 								break;
-
-
+							case "/dpi":
+								if (args.Length - 1 == i) // check if we're at the end
+									throw new ArgumentException(string.Format("The parameter \"{0}\" is missing an argument", args[i].Substring(1)));
+								++i; // advance 
+								dpi = int.Parse(args[i], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+								break;
 							default:
 								throw new ArgumentException(string.Format("Unknown switch {0}", args[i]));
 						}
 					}
+					if (dpi!=0 &&( graph == null && dfagraph == null && nfagraph==null))
+					{
+						throw new ArgumentException("<dpi> was specified but no GraphViz graph was indicated.", "/dpi");
+					}
 #if !DEBUG
 					parsedArgs = true;
 #endif
+					var dotopts = new DotGraphOptions();
+					if(dpi!=0)
+					{
+						dotopts.Dpi = dpi;
+					}
 					// now build it
 					if (string.IsNullOrEmpty(codeclass))
 					{
@@ -231,7 +246,7 @@ namespace Rolex
 						{
 							FFA[] tmpfas;
 							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false,staticprogress,TextWriter.Null,out tmpfas);
-							fa2.RenderToFile(nfagraph);
+							fa2.RenderToFile(nfagraph,dotopts);
 						}
 						stderr.Write("Converting to DFA ");
 						
@@ -243,8 +258,7 @@ namespace Rolex
 						}
 						if(null!=graph)
 						{
-							var dopts = new DotGraphOptions();
-							_RenderDotToFile(inputfile,graph, rules,lexerFas, blockEnds,dopts);
+							_RenderDotToFile(inputfile,graph, rules,lexerFas, blockEnds,dotopts);
 						}
 						int[] dfaTable = _ToDfaStateTable(fa,symids);
 						if (!noshared)
@@ -485,9 +499,10 @@ namespace Rolex
 		static void _PrintUsage(TextWriter w)
 		{
 			w.Write("Usage: "+Filename + " ");
-			w.WriteLine("<inputfile> [/output <outputfile>] [/class <codeclass>] [/namespace <codenamespace>]");
-			w.WriteLine("   [/language <codelanguage> [/external <externaltoken>] [/ignorecase] [/noshared]");
-			w.WriteLine("   [/ifstale] [/nfagraph <dfafile>] [/dfagraph <nfafile>] [/graph <graphfile>]");
+			w.WriteLine("<inputfile> [/output <outputfile>] [/class <codeclass>]");
+			w.WriteLine("   [/namespace <codenamespace>] [/language <codelanguage> [/external <externaltoken>]");
+			w.WriteLine("   [/ignorecase] [/noshared] [/ifstale] [/nfagraph <dfafile>] [/dfagraph <nfafile>]");
+			w.WriteLine("   [/graph <graphfile>] [/dpi <dpi>]");
 			w.WriteLine();
 			w.WriteLine(Name + " generates a lexer/scanner/tokenizer in the target .NET language");
 			w.WriteLine();
@@ -498,12 +513,13 @@ namespace Rolex
 			w.WriteLine("   <codelanguage>   The .NET language to generate the code in - default derived from <outputfile>");
 			w.WriteLine("   <externaltoken>  The namespace of the external token if one is to be used - default not external");
 			w.WriteLine("   <ignorecase>     Create a case insensitive lexer - defaults to case sensitive");
-			w.WriteLine("   <noshared>       Do not generate the shared code as part of the output. Defaults to generating the shared code");
+			w.WriteLine("   <noshared>       Do not generate the shared code as part of the output - defaults to generating the shared code");
 			w.WriteLine("   <ifstale>        Only generate if the input is newer than the output");
 			w.WriteLine("   <staticprogress> Do not use dynamic console features for progress indicators");
 			w.WriteLine("   <nfafile>        Write the NFA lexer graph to the specified image file.*");
 			w.WriteLine("   <dfafile>        Write the DFA lexer graph to the specified image file.*");
 			w.WriteLine("   <graphfile>      Write all the individual rule DFAs to a graph.*");
+			w.WriteLine("   <dpi>            The DPI of any outputed graphs - defaults to 300.*");
 			w.WriteLine();
 			w.WriteLine("   * Requires GraphViz to be installed and in the PATH");
 			w.WriteLine();
