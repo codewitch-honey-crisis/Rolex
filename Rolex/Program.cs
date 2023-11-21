@@ -8,9 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using static F.FFA;
+
 using System.Diagnostics;
-using System.Security.Cryptography;
 
 namespace Rolex
 {
@@ -164,7 +163,7 @@ namespace Rolex
 #if !DEBUG
 					parsedArgs = true;
 #endif
-					var dotopts = new DotGraphOptions();
+					var dotopts = new FFA.DotGraphOptions();
 					if(dpi!=0)
 					{
 						dotopts.Dpi = dpi;
@@ -1013,9 +1012,9 @@ namespace Rolex
 			}
 
 		}
-		static void _RenderRuleTo(int index,LexRule rule,FFA fa, FFA blockEnd,  TextWriter writer, DotGraphOptions options = null)
+		static void _RenderRuleTo(int index,LexRule rule,FFA fa, FFA blockEnd,  TextWriter writer, FFA.DotGraphOptions options = null)
 		{
-			if (null == options) options = new DotGraphOptions();
+			if (null == options) options = new FFA.DotGraphOptions();
 			string spfx = (null == options.StatePrefix ? "q" : options.StatePrefix);
 			
 			var name = _MakeSafeName(rule.Symbol);
@@ -1041,7 +1040,7 @@ namespace Rolex
 			}
 			writer.WriteLine("}");
 		}
-		static void _RenderDotGraph(string inputfile,IList<LexRule> rules,FFA[] fas,int[][] blockEnds, DotGraphOptions options, TextWriter writer)
+		static void _RenderDotGraph(string inputfile,IList<LexRule> rules,FFA[] fas,int[][] blockEnds, FFA.DotGraphOptions options, TextWriter writer)
 		{
 			//writer = Console.Out;
 			writer.WriteLine("digraph " + Path.GetFileNameWithoutExtension(inputfile) + " {");
@@ -1056,10 +1055,10 @@ namespace Rolex
 			writer.WriteLine("}");
 				
 		}
-		static void _RenderDotToFile(string inputfile,string filename,IList<LexRule> rules, FFA[] fas, int[][] blockEnds, DotGraphOptions options = null)
+		static void _RenderDotToFile(string inputfile,string filename,IList<LexRule> rules, FFA[] fas, int[][] blockEnds, FFA.DotGraphOptions options = null)
 		{
 			if (null == options)
-				options = new DotGraphOptions();
+				options = new FFA.DotGraphOptions();
 			string args = "-T";
 			string ext = Path.GetExtension(filename);
 			if (0 == string.Compare(".dot", ext, StringComparison.InvariantCultureIgnoreCase))
