@@ -63,7 +63,9 @@ namespace Rolex
 			// our working variables
 			TextReader input = null;
 			TextWriter output = null;
+#if !DEBUG
 			bool parsedArgs = false;
+#endif
 			try
 			{
 				if (0 == args.Length)
@@ -149,7 +151,9 @@ namespace Rolex
 								throw new ArgumentException(string.Format("Unknown switch {0}", args[i]));
 						}
 					}
+#if !DEBUG
 					parsedArgs = true;
+#endif
 					// now build it
 					if (string.IsNullOrEmpty(codeclass))
 					{
@@ -201,7 +205,10 @@ namespace Rolex
 						input.Close();
 						input = null;
 						LexRule.FillRuleIds(rules);
-
+						rules.Sort(new Comparison<LexRule>((LexRule lhs, LexRule rhs)=>{
+							int cmp = lhs.Id.CompareTo(rhs.Id);
+							return cmp;
+						}));
 						var ccu = new CodeCompileUnit();
 						var cns = new CodeNamespace();
 						if (!string.IsNullOrEmpty(codenamespace))
@@ -353,9 +360,15 @@ namespace Rolex
 		}
 		static string _MakeSafeName(string name)
 		{
-			var sb = new StringBuilder();
+			StringBuilder sb;
 			if (char.IsDigit(name[0]))
+			{
+				sb = new StringBuilder(name.Length+1);
 				sb.Append('_');
+			} else
+			{
+				 sb = new StringBuilder(name.Length);
+			}
 			for (var i = 0; i < name.Length; ++i)
 			{
 				var ch = name[i];
@@ -456,9 +469,9 @@ namespace Rolex
 		}
 		public static void _WriteProgress(int progress, bool update, TextWriter output)
 		{
-		 	 if (update)
-				 output.Write("\b");
-			 output.Write(_twirl[progress % _twirl.Length]);
+				if (update)
+					output.Write("\b");
+				output.Write(_twirl[progress % _twirl.Length]);
 		}
 #if !DEBUG
 		// do our error handling here (release builds)
