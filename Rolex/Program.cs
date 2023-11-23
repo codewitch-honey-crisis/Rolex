@@ -271,6 +271,9 @@ namespace Rolex
 							// import our Export/TableTokenizer.cs into the library
 							_ImportCompileUnit(Deslanged.TableTokenizer, cns);
 
+						} else
+						{
+							cns.Imports.Add(new CodeNamespaceImport("System.IO"));
 						}
 						if(!string.IsNullOrEmpty(externaltoken))
 							cns.Imports.Add(new CodeNamespaceImport(externaltoken));

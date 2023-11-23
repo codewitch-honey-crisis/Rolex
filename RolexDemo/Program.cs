@@ -17,7 +17,16 @@ namespace RolexDemo
 						Console.WriteLine("{0}: {1} at line {2}, column {3}", tok.SymbolId, tok.Value, tok.Line, tok.Column);
 				}
 			}
-			Console.WriteLine();
+			Console.WriteLine("--------------------------------------------------");
+			using (var sr = File.OpenText("..\\..\\Program.cs"))
+			{
+				var extokenizer = new Example2Tokenizer(sr);
+				foreach (var tok in extokenizer)
+				{
+					if (-1 != tok.SymbolId)
+						Console.WriteLine("{0}: {1} at line {2}, column {3}", tok.SymbolId, tok.Value, tok.Line, tok.Column);
+				}
+			}
 			return;
 			
 

@@ -36,6 +36,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Example2Tokenizer.cs" />
     <Compile Include="ExampleTokenizer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -43,11 +44,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <Content Include="Example2.rl" />
-    <None Include="Example.rl" />
+    <Content Include="Example.rl" />
     <None Include="Slang.rl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"$(SolutionDir)Rolex.exe" "$(ProjectDir)Example.rl" /output "$(ProjectDir)ExampleTokenizer.cs" /namespace RolexDemo /ifstale</PreBuildEvent>
+    <PreBuildEvent>"$(SolutionDir)Rolex.exe" "$(ProjectDir)Example.rl" /output "$(ProjectDir)ExampleTokenizer.cs" /namespace RolexDemo /ifstale
+"$(SolutionDir)Rolex.exe" "$(ProjectDir)Example2.rl" /output "$(ProjectDir)Example2Tokenizer.cs" /namespace RolexDemo /ifstale /noshared</PreBuildEvent>
   </PropertyGroup>
 </Project>
