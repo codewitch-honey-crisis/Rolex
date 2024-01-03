@@ -569,7 +569,7 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FA ParseToFA(int id, LexRule rule,bool ignoreCase, string filename)
+		static FA _ParseToFA(int id, LexRule rule,bool ignoreCase, string filename)
 		{
 			FA fa;
 			if (rule.Expression.StartsWith("\""))
@@ -627,7 +627,7 @@ namespace Rolex
 					var lr = v as LexRule;
 					if (null != lr)
 					{
-						var fa = ParseToFA(rule.Id,lr, ci, filename);
+						var fa = _ParseToFA(rule.Id,lr, ci, filename);
 					
 						fa = fa.ToMinimized();
 						result[rule.Id] = fa.ToArray();
