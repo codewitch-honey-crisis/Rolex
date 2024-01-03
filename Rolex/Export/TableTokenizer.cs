@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Rolex
 {
-	class TextReaderEnumerator : Object, IEnumerator<char>
+	class TextReaderEnumerator : System.Object, IEnumerator<char>
 	{
 		private int _state;
 		private char _current;

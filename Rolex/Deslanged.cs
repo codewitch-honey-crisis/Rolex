@@ -135,7 +135,7 @@ namespace Rolex {
                                         new CodeNamespaceImport("System.Text")}, new CodeTypeDeclaration[0], new CodeCommentStatement[0]),
                             Deslanged._Namespace("Rolex", new CodeNamespaceImport[0], new CodeTypeDeclaration[] {
                                         Deslanged._TypeDeclaration("TextReaderEnumerator", true, false, false, false, false, (MemberAttributes.Final | MemberAttributes. Private), TypeAttributes.NotPublic, new CodeTypeParameter[0], new CodeTypeReference[] {
-                                                    new CodeTypeReference("Object"),
+                                                    new CodeTypeReference(typeof(object)),
                                                     new CodeTypeReference("IEnumerator`1", new CodeTypeReference[] {
                                                                 new CodeTypeReference(typeof(char))})}, new CodeTypeMember[] {
                                                     Deslanged._MemberField(new CodeTypeReference(typeof(int)), "_state", null, MemberAttributes.Private, new CodeCommentStatement[0], new CodeAttributeDeclaration[0], new CodeDirective[0], new CodeDirective[0], null),
