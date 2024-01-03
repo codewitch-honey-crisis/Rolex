@@ -163,7 +163,7 @@ namespace Rolex
 #if !DEBUG
 					parsedArgs = true;
 #endif
-					var dotopts = new FFA.DotGraphOptions();
+					var dotopts = new FADotGraphOptions();
 					if(dpi!=0)
 					{
 						dotopts.Dpi = dpi;
@@ -233,7 +233,7 @@ namespace Rolex
 						{
 							symmap.Add(rules[i].Id, rules[i].Expression);
 						}
-						FFA[] lexerFas;
+						FA[] lexerFas;
 						var fa = _BuildLexer(rules, ignorecase,inputfile,true,staticprogress, stderr, out lexerFas);
 						var symbolTable = _BuildSymbolTable(rules);
 						var symids = new int[symbolTable.Length];
@@ -243,7 +243,7 @@ namespace Rolex
 						var nodeFlags = _BuildNodeFlags(rules);
 						if (null != nfagraph)
 						{
-							FFA[] tmpfas;
+							FA[] tmpfas;
 							var fa2 = _BuildLexer(rules, ignorecase, inputfile, false,staticprogress,TextWriter.Null,out tmpfas);
 							fa2.RenderToFile(nfagraph,dotopts);
 						}
@@ -569,27 +569,27 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA ParseToFA(int id, LexRule rule,bool ignoreCase, string filename)
+		static FA ParseToFA(int id, LexRule rule,bool ignoreCase, string filename)
 		{
-			FFA fa;
+			FA fa;
 			if (rule.Expression.StartsWith("\""))
 			{
 				var pc = LexContext.Create(rule.Expression);
-				fa = FFA.Literal(FFA.ToUtf32(pc.ParseJsonString()), id);
+				fa = FA.Literal(FA.ToUtf32(pc.ParseJsonString()), id);
 			}
 			else
-				fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition,filename);
+				fa = FA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), id,true, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition,filename);
 			if (!ignoreCase)
 			{
 				var ic = (bool)rule.GetAttribute("ignoreCase", false);
 				if (ic)
-					fa = FFA.CaseInsensitive(fa, id);
+					fa = FA.CaseInsensitive(fa);
 			}
 			else
 			{
 				var ic = (bool)rule.GetAttribute("ignoreCase", true);
 				if (ic)
-					fa = FFA.CaseInsensitive(fa, id);
+					fa = FA.CaseInsensitive(fa);
 			}
 			return fa;
 		}
@@ -616,11 +616,11 @@ namespace Rolex
 				var be = v as string;
 				if (!string.IsNullOrEmpty(be))
 				{
-					var cfa = FFA.Literal(FFA.ToUtf32(be), rule.Id);
+					var cfa = FA.Literal(FA.ToUtf32(be), rule.Id);
 					if (ci)
-						cfa = FFA.CaseInsensitive(cfa, rule.Id);
+						cfa = FA.CaseInsensitive(cfa);
 					cfa = cfa.ToMinimized();
-					result[rule.Id] = cfa.ToDfaTable();
+					result[rule.Id] = cfa.ToArray();
 				}
 				else
 				{
@@ -630,7 +630,7 @@ namespace Rolex
 						var fa = ParseToFA(rule.Id,lr, ci, filename);
 					
 						fa = fa.ToMinimized();
-						result[rule.Id] = fa.ToDfaTable();
+						result[rule.Id] = fa.ToArray();
 					}
 				}
 			}
@@ -655,25 +655,25 @@ namespace Rolex
 			}
 			return result;
 		}
-		static FFA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized, bool dots,TextWriter output, out FFA[] exprs)
+		static FA _BuildLexer(IList<LexRule> rules, bool ignoreCase,string inputFile, bool minimized, bool dots,TextWriter output, out FA[] exprs)
 		{
 			output.Write("Building lexer ");
 			if (!dots)
 			{
 				_WriteProgressBar(0, false, output);
 			}
-			exprs = new FFA[rules.Count];
-			var result = new FFA();
+			exprs = new FA[rules.Count];
+			var result = new FA();
 			for (var i = 0; i < exprs.Length; ++i)
 			{
 				var rule = rules[i];
-				FFA fa;
+				FA fa;
 				if(rule.Expression.StartsWith("\""))
 				{
 					var pc = LexContext.Create(rule.Expression);
-					fa = FFA.Literal(FFA.ToUtf32(pc.ParseJsonString()),rule.Id);
+					fa = FA.Literal(FA.ToUtf32(pc.ParseJsonString()),rule.Id);
 				} else
-					fa = FFA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), rule.Id, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition, inputFile);
+					fa = FA.Parse(rule.Expression.Substring(1, rule.Expression.Length - 2), rule.Id,true, rule.ExpressionLine, rule.ExpressionColumn, rule.ExpressionPosition, inputFile);
 				if (0 > rule.Id)
 				{
 					throw new InvalidOperationException(string.Format("A rule id was less than zero at line {0}", rule.ExpressionLine));
@@ -682,13 +682,13 @@ namespace Rolex
 				{
 					var ic = (bool)rule.GetAttribute("ignoreCase", false);
 					if (ic)
-						fa = FFA.CaseInsensitive(fa, rule.Id);
+						fa = FA.CaseInsensitive(fa);
 				}
 				else
 				{
 					var ic = (bool)rule.GetAttribute("ignoreCase", true);
 					if (ic)
-						fa = FFA.CaseInsensitive(fa, rule.Id);
+						fa = FA.CaseInsensitive(fa);
 				}
 				result.AddEpsilon(minimized?fa.ToMinimized():fa);
 				exprs[i] = fa;
@@ -709,7 +709,7 @@ namespace Rolex
 			return result;
 		}
 		
-		static int[] _ToDfaStateTable(FFA dfa, IList<int> symbolTable = null)
+		static int[] _ToDfaStateTable(FA dfa, IList<int> symbolTable = null)
 		{
 			var closure = dfa.FillClosure();
 			var symbolLookup = new Dictionary<int, int>();
@@ -740,7 +740,7 @@ namespace Rolex
 				}
 
 			// build the root array
-			return dfa.ToDfaTable();
+			return dfa.ToArray();
 		}
 		static void _AppendRangeTo(StringBuilder builder, int[] ranges, int index)
 		{
@@ -885,11 +885,11 @@ namespace Rolex
 			result = result.Replace("\f", "\\f");
 			return result;
 		}
-		static void _RenderFsmTo(FFA fa, string name, int startingIndex, string spfx, bool hideAccept, bool hideAcceptingId, TextWriter writer)
+		static void _RenderFsmTo(FA fa, string name, int startingIndex, string spfx, bool hideAccept, bool hideAcceptingId, TextWriter writer)
 		{
 			var closure = fa.FillClosure();
-			var finals = new List<FFA>();
-			var accepting = FFA.FillAcceptingStates(closure);
+			var finals = new List<FA>();
+			var accepting = FA.FillAcceptingStates(closure);
 			foreach (var ffa in closure)
 				if (ffa.IsFinal && !ffa.IsAccepting)
 					finals.Add(ffa);
@@ -1015,9 +1015,9 @@ namespace Rolex
 			}
 
 		}
-		static void _RenderRuleTo(int index,LexRule rule,FFA fa, FFA blockEnd,  TextWriter writer, FFA.DotGraphOptions options = null)
+		static void _RenderRuleTo(int index,LexRule rule,FA fa, FA blockEnd,  TextWriter writer, FADotGraphOptions options = null)
 		{
-			if (null == options) options = new FFA.DotGraphOptions();
+			if (null == options) options = new FADotGraphOptions();
 			string spfx = (null == options.StatePrefix ? "q" : options.StatePrefix);
 			
 			var name = _MakeSafeName(rule.Symbol);
@@ -1043,7 +1043,7 @@ namespace Rolex
 			}
 			writer.WriteLine("}");
 		}
-		static void _RenderDotGraph(string inputfile,IList<LexRule> rules,FFA[] fas,int[][] blockEnds, FFA.DotGraphOptions options, TextWriter writer)
+		static void _RenderDotGraph(string inputfile,IList<LexRule> rules,FA[] fas,int[][] blockEnds, FADotGraphOptions options, TextWriter writer)
 		{
 			//writer = Console.Out;
 			writer.WriteLine("digraph " + Path.GetFileNameWithoutExtension(inputfile) + " {");
@@ -1053,15 +1053,15 @@ namespace Rolex
 			for (var i = rules.Count - 1; i >= 0; --i)
 			{
 				var fa = fas[i];
-				_RenderRuleTo(i, rules[i], fa, FFA.FromDfaTable(blockEnds[rules[i].Id]), writer, options);
+				_RenderRuleTo(i, rules[i], fa, FA.FromArray(blockEnds[rules[i].Id]), writer, options);
 			}
 			writer.WriteLine("}");
 				
 		}
-		static void _RenderDotToFile(string inputfile,string filename,IList<LexRule> rules, FFA[] fas, int[][] blockEnds, FFA.DotGraphOptions options = null)
+		static void _RenderDotToFile(string inputfile,string filename,IList<LexRule> rules, FA[] fas, int[][] blockEnds, FADotGraphOptions options = null)
 		{
 			if (null == options)
-				options = new FFA.DotGraphOptions();
+				options = new FADotGraphOptions();
 			string args = "-T";
 			string ext = Path.GetExtension(filename);
 			if (0 == string.Compare(".dot", ext, StringComparison.InvariantCultureIgnoreCase))
