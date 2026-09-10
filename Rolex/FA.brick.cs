@@ -1420,7 +1420,7 @@ public static IEnumerable<int>ToUtf32(IEnumerable<char>@string){int chh=-1;forea
  chh=-1;if(-1!=chh){if(!char.IsLowSurrogate(ch))throw new IOException("Unterminated Unicode surrogate pair found in string.");yield return char.ConvertToUtf32(unchecked((char)chh),
 ch);chh=-1;continue;}yield return ch;}}private sealed class _KeySet<T>:ISet<T>,IEquatable<_KeySet<T>>{HashSet<T>_inner;int _hashCode;public _KeySet(IEqualityComparer<T>
 comparer){_inner=new HashSet<T>(comparer);_hashCode=0;}public _KeySet(){_inner=new HashSet<T>();_hashCode=0;}public int Count=>_inner.Count;public bool
- IsReadOnly=>true; public bool Add(T item){if(null!=item)_hashCode^=item.GetHashCode();return _inner.Add(item);}bool ISet<T>.Add(T item){_ThrowReadOnly();
+ IsReadOnly=>true; public bool Add(T item){if(!_inner.Add(item))return false;if(null!=item)_hashCode^=item.GetHashCode();return true;}bool ISet<T>.Add(T item){_ThrowReadOnly();
 return false;}public void Clear(){_ThrowReadOnly();}public bool Contains(T item){return _inner.Contains(item);}public void CopyTo(T[]array,int arrayIndex)
 {_inner.CopyTo(array,arrayIndex);}void ISet<T>.ExceptWith(IEnumerable<T>other){_ThrowReadOnly();}public IEnumerator<T>GetEnumerator(){return _inner.GetEnumerator();
 }void ISet<T>.IntersectWith(IEnumerable<T>other){_ThrowReadOnly();}public bool IsProperSubsetOf(IEnumerable<T>other){return _inner.IsProperSubsetOf(other);

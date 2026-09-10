@@ -6,13 +6,19 @@ using System.Text;
 using F;
 
 // Dumps FA-level golden state tables. Built against the PRE-FIX FA.brick.cs - master's
-// engine, with only the \u/\x escape fix applied - so the recorded tables carry real
+// engine, with only the correctness fixes applied - so the recorded tables carry real
 // pre-fix provenance, then asserted against post-fix code.
 //
-// The escape fix has to be in the recording too: it changes what the escape-bearing rules
-// mean, so a table recorded without it would pin a language nothing should produce. It is
-// the only change carried over; the determinization rewrite these tables are evidence for
-// is deliberately absent.
+// Two fixes are carried over, both because they change what a correct table looks like:
+//
+//   the \u/\x escape fix, which changes what the escape-bearing rules mean, so a table
+//   recorded without it would pin a language nothing should produce;
+//
+//   the _KeySet.Add hash fix, without which determinization emits duplicate states, so a
+//   table recorded without it would pin a DFA with states that should never have existed.
+//
+// The determinization rewrite these tables are evidence for is deliberately absent, and
+// both carried fixes are verified to produce identical tables on either side of it.
 static class GoldenGen
 {
     static IEnumerable<KeyValuePair<string, string>> RuleRegexes(string rlPath)
@@ -64,7 +70,7 @@ static class GoldenGen
         {
             w.NewLine = "\n";
             w.WriteLine("# name\tstage\tpacked-state-table");
-            w.WriteLine("# generated from the pre-determinization-fix FA.brick.cs, with the unicode and hex escape fix applied");
+            w.WriteLine("# generated from the pre-determinization-fix FA.brick.cs, with the escape and _KeySet hash fixes applied");
             foreach (var kv in BuildCases(rl))
             {
                 var nfa = FA.Parse(kv.Value, 0, true);
