@@ -67,7 +67,15 @@ namespace Rolex.Tests
                     var stdout = p.StandardOutput.ReadToEndAsync();
                     var stderr = p.StandardError.ReadToEndAsync();
 
-                    Assert.True(p.WaitForExit(300000), grammar + " did not finish within 5 minutes.");
+                    // Kill before asserting, otherwise a timeout leaves rolex.exe running:
+                    // disposing the Process only releases the handle, it does not stop the child.
+                    var exited = p.WaitForExit(300000);
+                    if (!exited)
+                    {
+                        try { p.Kill(); p.WaitForExit(); }
+                        catch (InvalidOperationException) { } // already gone
+                    }
+                    Assert.True(exited, grammar + " did not finish within 5 minutes.");
                     await Task.WhenAll(stdout, stderr);
                     Assert.True(p.ExitCode == 0, grammar + " exited with " + p.ExitCode + ".");
                 }

@@ -64,6 +64,34 @@ namespace Rolex.Tests
             }
         }
 
+        /// <summary>
+        /// Pins the pre-existing contract for a pre-populated result: if the list already
+        /// contains the starting state, the call is a no-op and descendants are NOT
+        /// explored. That is what the original did - it opened with
+        /// `if (result.Contains(this)) return result;` before touching any transition -
+        /// and every caller in the engine relies on it, since the recursion re-enters
+        /// through this same check.
+        ///
+        /// Worth stating plainly because it looks like a bug: seeding a list with only the
+        /// start state gives back just that state. Making it traverse instead would be a
+        /// behaviour change, not a fix, and this whole change set is meant to leave the
+        /// generated tables untouched. Verified to hold on the pre-fix engine too.
+        /// </summary>
+        [Fact]
+        public void Epsilon_closure_seeded_with_only_the_start_state_is_a_no_op()
+        {
+            // compact:false keeps the epsilon transitions the compact parse would collapse.
+            var nfa = FA.Parse("(a(b|c)?d)*", 0, false);
+            var full = nfa.FillEpsilonClosure();
+            Assert.True(full.Count > 1, "test needs a state with epsilon descendants");
+
+            var seeded = new List<FA> { nfa };
+            nfa.FillEpsilonClosure(seeded);
+
+            Assert.Single(seeded);
+            Assert.Same(nfa, seeded[0]);
+        }
+
         [Fact]
         public void Epsilon_closure_appends_to_a_pre_filled_list_without_re_adding()
         {

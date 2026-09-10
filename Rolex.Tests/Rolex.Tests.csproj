@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="TestData\fa-golden.tsv" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Update, not Include: the SDK's default None glob already picks this up,
+         so Include would add it a second time. -->
+    <None Update="TestData\fa-golden.tsv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- Tools\ holds the one-off golden recorder. It has its own Main and is kept for

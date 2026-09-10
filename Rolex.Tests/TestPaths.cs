@@ -15,15 +15,25 @@ namespace Rolex.Tests
 
         public static string TestCases { get { return Path.Combine(RepoRoot, "testcases"); } }
 
-        /// <summary>The freshly built generator, preferred over the copy in the solution root.</summary>
+        /// <summary>
+        /// The generator built in the same configuration as these tests, falling back to
+        /// the other configuration and then to the copy in the solution root.
+        /// Matching the configuration first matters: preferring Release unconditionally
+        /// means a Debug test run silently checks a stale Release exe.
+        /// </summary>
         public static string RolexExe
         {
             get
             {
+#if DEBUG
+                const string own = "Debug", other = "Release";
+#else
+                const string own = "Release", other = "Debug";
+#endif
                 var candidates = new[]
                 {
-                    Path.Combine(RepoRoot, @"Rolex\bin\Release\rolex.exe"),
-                    Path.Combine(RepoRoot, @"Rolex\bin\Debug\rolex.exe"),
+                    Path.Combine(RepoRoot, @"Rolex\bin\" + own + @"\rolex.exe"),
+                    Path.Combine(RepoRoot, @"Rolex\bin\" + other + @"\rolex.exe"),
                     Path.Combine(RepoRoot, "rolex.exe"),
                 };
                 foreach (var c in candidates)
