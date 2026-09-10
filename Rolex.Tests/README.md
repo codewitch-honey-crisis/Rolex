@@ -1,10 +1,11 @@
 # Rolex.Tests
 
-Covers the determinization and unicode escape fixes in `Rolex/FA.brick.cs`. Run with:
+Covers the determinization, unicode escape and `_KeySet` hash fixes in
+`Rolex/FA.brick.cs`. Run with:
 
     dotnet test Rolex.Tests\Rolex.Tests.csproj
 
-172 tests, about 3 seconds. Against the engine as it was *before* the fix the same
+199 tests, about 3 seconds. Against the engine as it was *before* the fix the same
 suite takes just over 6 minutes, which is the problem it exists to catch.
 
 ## Why the engine is source-linked rather than referenced
@@ -63,6 +64,17 @@ wrong - `\x20AC` as `0x00AC`. `\u` was never affected; it accumulates into a
 `ushort`. Same failure mode as the cursor bug: the grammar silently means a
 different character and nothing reports it.
 
+**`SubsetIdentityTests`** - the `_KeySet` hash fix. `_KeySet<T>.Add` XORed the
+item's hash on every call, including calls the inner `HashSet` rejected as
+duplicates. XOR is self-inverse, so the set's hash came to depend on how many times
+a member arrived rather than on membership, and since `_KeySet.Equals` opens with a
+hash comparison, `_Determinize` missed subsets it had already seen and allocated a
+second DFA state for them. `_KeySet` is private, so the tests assert the consequence
+through the public API: determinization must produce exactly one state per NFA
+subset. They also check the determinized and minimized machines still agree on a
+corpus sampled by walking the minimized machine and probing one codepoint either
+side of every transition range.
+
 **`GeneratedOutputTests`** - end to end. Runs the real `rolex.exe` over every
 grammar in `testcases/` and checks the emitted file against the SHA-256 goldens
 in `testcases/expected.txt`.
@@ -81,13 +93,22 @@ determinization fix, using `Tools/GoldenGen.cs` compiled against the pre-fix
 `FA.brick.cs`. That is what makes it evidence rather than a snapshot of current
 behaviour.
 
-The recording carries one later change: the unicode escape fix is applied to that
-pre-fix `FA.brick.cs` before recording. It has to be, because it corrects what the
-escape-bearing rules mean, and a table recorded without it would pin a language
-nothing should produce. Nine of the thirty-nine rows moved when it was re-recorded,
-all of them belonging to `CELL_FUNCTION_LIST`, `SHEET_RANGE_PREFIX` and
-`SINGLE_SHEET_PREFIX` - the only three rules in `slow-6-rules.rl` that use escapes.
-The other ten cases are byte-identical to the original recording.
+The recording carries two later changes, applied to that pre-fix `FA.brick.cs`
+before recording. Both have to be there, because each corrects what a right answer
+looks like rather than how it is computed, and both are verified to produce
+identical tables on either side of the determinization rewrite.
+
+The unicode escape fix, because it corrects what the escape-bearing rules mean and a
+table recorded without it would pin a language nothing should produce. Nine of the
+thirty-nine rows moved, all belonging to `CELL_FUNCTION_LIST`, `SHEET_RANGE_PREFIX`
+and `SINGLE_SHEET_PREFIX` - the only three rules in `slow-6-rules.rl` that use
+escapes.
+
+The `_KeySet.Add` hash fix, because without it determinization emits duplicate
+states and a table recorded without it would pin a DFA with states that should never
+have existed. Two rows moved, the `dfa` stage of `SHEET_RANGE_PREFIX` and
+`SINGLE_SHEET_PREFIX`; their `nfa` and `min` stages did not, which is the signature
+of the bug - minimization was already merging the duplicates away.
 
 `Tools/GoldenGen.cs` is excluded from compilation and kept only so the file can
 be reproduced. Re-recording is not a routine action - if these tables change,

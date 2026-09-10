@@ -25,6 +25,10 @@ byte-identical to the fully fixed build - so the determinization fix is still
 output-neutral on every grammar here. `rules-1` and `rules-2` use no escapes and
 have never changed.
 
+The `_KeySet.Add` hash fix did not move any of these. It removes duplicate states
+from `ToDfa()`, and every duplicate it removes was one minimization already merged,
+so generated output is untouched - which is what these hashes are here to show.
+
 Use `-Update` to re-record the hashes, and only when the tables are meant to
 change.
 
