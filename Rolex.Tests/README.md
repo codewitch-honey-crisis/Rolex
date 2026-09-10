@@ -5,7 +5,7 @@ Covers the determinization, unicode escape and `_KeySet` hash fixes in
 
     dotnet test Rolex.Tests\Rolex.Tests.csproj
 
-199 tests, about 3 seconds. Against the engine as it was *before* the fix the same
+212 tests, about 3 seconds. Against the engine as it was *before* the fix the same
 suite takes just over 6 minutes, which is the problem it exists to catch.
 
 ## Why the engine is source-linked rather than referenced
@@ -81,10 +81,19 @@ in `testcases/expected.txt`.
 
 `Combined_lexer_for_six_rules_builds_without_blowing_up` is the test that
 actually fails on the unfixed engine. It builds the six-rule lexer the way
-`_BuildLexer` does and asserts it finishes inside 30 s and 512 MB. Before the
-fix that path reports *"Combined build took 78.6s"* - matching the 76 s in
-`testcases/README.md` - and needed over 3 GB. The budgets are deliberately loose:
-they exist to catch a return of super-linear growth, not to police milliseconds.
+`_BuildLexer` does and asserts it finishes inside 30 s. Before the fix that path
+reports *"Combined build took 78.6s"* - matching the 76 s in
+`testcases/README.md`. The budget is deliberately loose: it exists to catch a
+return of super-linear growth, not to police milliseconds.
+
+Peak memory is asserted separately, by
+`Generated_tokenizer_stays_within_its_memory_budget`, which samples
+`PeakWorkingSet64` from the `rolex.exe` child process while it generates
+`full-r1c1.rl` and requires it to stay under 1 GB. It lives there rather than in
+the in-process test because `GC.GetTotalMemory` reports the managed heap at one
+instant, not the peak - the intermediate structures that made this path need
+3 GB are garbage by the time the method returns, so an in-process reading never
+actually measured the blow-up.
 
 ## Provenance of the goldens
 

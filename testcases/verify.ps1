@@ -106,6 +106,13 @@ finally {
 $results | Format-Table -AutoSize
 
 if ($Update) {
+    # A partial rewrite is worse than no rewrite: it would silently drop the goldens for
+    # whichever cases failed to generate, and the next run would then compare against a
+    # file that is missing exactly the entries that were broken.
+    if ($failed -gt 0) {
+        Write-Host "$failed case(s) failed to generate; $expectedFile left unchanged." -ForegroundColor Red
+        exit 1
+    }
     $lines = @(
         '# SHA-256 of the generated tokenizer for each grammar under testcases/.',
         '# Produced by: rolex.exe <grammar> /output <file> /class T /namespace N /noshared',

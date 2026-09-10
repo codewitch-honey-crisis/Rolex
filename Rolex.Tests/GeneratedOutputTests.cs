@@ -53,38 +53,7 @@ namespace Rolex.Tests
             var output = Path.Combine(Path.GetTempPath(), "rolex-test-" + Guid.NewGuid().ToString("N") + ".cs");
             try
             {
-                // /class and /namespace are pinned: without /class the emitted class name is
-                // derived from the output file name, which would make the hash path-dependent.
-                var psi = new ProcessStartInfo(exe,
-                    string.Format("\"{0}\" /output \"{1}\" /class T /namespace N /noshared", input, output))
-                {
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                };
-
-                using (var p = Process.Start(psi))
-                {
-                    // Drain both pipes concurrently. rolex.exe writes a busy progress
-                    // spinner to stderr, so reading one stream to the end before starting
-                    // on the other fills the other's buffer and deadlocks the child.
-                    var stdout = p.StandardOutput.ReadToEndAsync();
-                    var stderr = p.StandardError.ReadToEndAsync();
-
-                    // Kill before asserting, otherwise a timeout leaves rolex.exe running:
-                    // disposing the Process only releases the handle, it does not stop the child.
-                    var exited = p.WaitForExit(300000);
-                    if (!exited)
-                    {
-                        try { p.Kill(); p.WaitForExit(); }
-                        catch (InvalidOperationException) { } // already gone
-                    }
-                    Assert.True(exited, grammar + " did not finish within 5 minutes.");
-                    await Task.WhenAll(stdout, stderr);
-                    Assert.True(p.ExitCode == 0, grammar + " exited with " + p.ExitCode + ".");
-                }
-
+                await RunGenerator(exe, grammar, input, output);
                 Assert.True(File.Exists(output), "rolex.exe produced no output for " + grammar + ".");
                 Assert.Equal(expected[grammar], Sha256(output));
             }
@@ -106,7 +75,6 @@ namespace Rolex.Tests
             var rules = GoldenFile.ReadRules(Path.Combine(TestPaths.TestCases, "slow-6-rules.rl"));
             Assert.Equal(6, rules.Count);
 
-            var before = GC.GetTotalMemory(true);
             var sw = Stopwatch.StartNew();
 
             var combined = new FA();
@@ -115,15 +83,109 @@ namespace Rolex.Tests
 
             var dfa = combined.ToDfa();
             sw.Stop();
-            var allocated = GC.GetTotalMemory(false) - before;
 
             Assert.NotEmpty(dfa.FillClosure());
             Assert.True(sw.Elapsed.TotalSeconds < 30,
                 string.Format("Combined build took {0:N1}s; before the fix this path was the 76s/OOM case.",
                               sw.Elapsed.TotalSeconds));
-            Assert.True(allocated < 512L * 1024 * 1024,
-                string.Format("Combined build held {0:N0} MB; before the fix it needed over 3 GB.",
-                              allocated / (1024 * 1024)));
+
+            // Time only. This test used to also assert on GC.GetTotalMemory, which reports
+            // the managed heap at one instant, not the peak - the intermediate structures
+            // that made this path need 3 GB are garbage by the time the method returns, so
+            // it never actually measured the blow-up (the pre-fix run failed on the 78.6s
+            // time budget, not on memory). Peak memory is asserted where it can be observed
+            // honestly: Generated_tokenizer_stays_within_its_memory_budget, which reads
+            // PeakWorkingSet64 from the rolex.exe child process.
+        }
+
+        /// <summary>
+        /// Peak memory, measured the only way it can be measured honestly: the real
+        /// generator in its own process, reading PeakWorkingSet64 after it exits.
+        ///
+        /// full-r1c1 is the worst case - 39 rules. Before the fix it could not be generated
+        /// at all, dying with OutOfMemoryException at ~2 GB on the shipped 32-bit-preferred
+        /// build and ~3.4 GB when allowed more. It now peaks around 100 MB, so 1 GB is a
+        /// loose bound that still cannot be reached without the blow-up coming back.
+        /// </summary>
+        [Fact]
+        public async Task Generated_tokenizer_stays_within_its_memory_budget()
+        {
+            var exe = TestPaths.RolexExe;
+            Assert.True(exe != null,
+                "rolex.exe was not found. Build the Rolex project before running these tests.");
+
+            const string grammar = "full-r1c1.rl";
+            var input = Path.Combine(TestPaths.TestCases, grammar);
+            var output = Path.Combine(Path.GetTempPath(), "rolex-test-" + Guid.NewGuid().ToString("N") + ".cs");
+            try
+            {
+                var peak = await RunGenerator(exe, grammar, input, output);
+                // Guard against a vacuous pass: if sampling never caught the process, peak
+                // is 0 and the budget below would hold no matter how much memory was used.
+                Assert.True(peak > 8L * 1024 * 1024,
+                    string.Format("Only sampled {0:N0} bytes of peak working set - the measurement did not run.", peak));
+                Assert.True(peak < 1024L * 1024 * 1024,
+                    string.Format("{0} peaked at {1:N0} MB; before the fix this grammar could not be generated at all.",
+                                  grammar, peak / (1024 * 1024)));
+            }
+            finally
+            {
+                if (File.Exists(output)) File.Delete(output);
+            }
+        }
+
+        /// <summary>Runs rolex.exe over one grammar and returns its peak working set in bytes.</summary>
+        private static async Task<long> RunGenerator(string exe, string grammar, string input, string output)
+        {
+            // /class and /namespace are pinned: without /class the emitted class name is
+            // derived from the output file name, which would make the hash path-dependent.
+            var psi = new ProcessStartInfo(exe,
+                string.Format("\"{0}\" /output \"{1}\" /class T /namespace N /noshared", input, output))
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            };
+
+            using (var p = Process.Start(psi))
+            {
+                // Drain both pipes concurrently. rolex.exe writes a busy progress
+                // spinner to stderr, so reading one stream to the end before starting
+                // on the other fills the other's buffer and deadlocks the child.
+                var stdout = p.StandardOutput.ReadToEndAsync();
+                var stderr = p.StandardError.ReadToEndAsync();
+
+                // Sample the peak while it runs: PeakWorkingSet64 throws
+                // InvalidOperationException once the process has exited, so it cannot be
+                // read afterwards.
+                long peak = 0;
+                var clock = Stopwatch.StartNew();
+                bool exited;
+                while (!(exited = p.WaitForExit(25)) && clock.ElapsedMilliseconds < 300000)
+                {
+                    try
+                    {
+                        p.Refresh();
+                        if (p.PeakWorkingSet64 > peak) peak = p.PeakWorkingSet64;
+                    }
+                    catch (InvalidOperationException) { break; } // exited between the check and the read
+                }
+                if (!exited) exited = p.WaitForExit(0);
+
+                // Kill before asserting, otherwise a timeout leaves rolex.exe running:
+                // disposing the Process only releases the handle, it does not stop the child.
+                if (!exited)
+                {
+                    try { p.Kill(); p.WaitForExit(); }
+                    catch (InvalidOperationException) { } // already gone
+                }
+                Assert.True(exited, grammar + " did not finish within 5 minutes.");
+                await Task.WhenAll(stdout, stderr);
+                Assert.True(p.ExitCode == 0, grammar + " exited with " + p.ExitCode + ".");
+
+                return peak;
+            }
         }
 
         private static Dictionary<string, string> LoadExpected()

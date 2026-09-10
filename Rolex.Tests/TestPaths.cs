@@ -25,20 +25,21 @@ namespace Rolex.Tests
         {
             get
             {
+                var configured = Environment.GetEnvironmentVariable("ROLEX_EXE");
+                if (!string.IsNullOrEmpty(configured))
+                    return File.Exists(configured) ? configured : null;
+
 #if DEBUG
-                const string own = "Debug", other = "Release";
+                const string own = "Debug";
 #else
-                const string own = "Release", other = "Debug";
+                const string own = "Release";
 #endif
-                var candidates = new[]
-                {
-                    Path.Combine(RepoRoot, @"Rolex\bin\" + own + @"\rolex.exe"),
-                    Path.Combine(RepoRoot, @"Rolex\bin\" + other + @"\rolex.exe"),
-                    Path.Combine(RepoRoot, "rolex.exe"),
-                };
-                foreach (var c in candidates)
-                    if (File.Exists(c)) return c;
-                return null;
+                // Active configuration only. Falling back to the other configuration, or to
+                // the solution-root copy the post-build event leaves behind, would let these
+                // tests pass against a generator built from different source - which for an
+                // output-equality suite is worse than not running at all.
+                var exe = Path.Combine(RepoRoot, @"Rolex\bin\" + own + @"\rolex.exe");
+                return File.Exists(exe) ? exe : null;
             }
         }
 

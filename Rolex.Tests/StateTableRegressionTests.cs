@@ -64,21 +64,42 @@ namespace Rolex.Tests
             }
         }
 
+        /// <summary>
+        /// The theory above is driven by the golden file itself, so a deleted row silently
+        /// means one fewer test rather than a failure. This is the check that notices:
+        /// every case must carry exactly one row per stage, and the case list must match
+        /// what the generator was given.
+        /// </summary>
         [Fact]
-        public void Golden_file_covers_every_rule_of_the_slow_grammar()
+        public void Golden_file_covers_every_case_at_every_stage()
         {
+            var expectedStages = new[] { "nfa", "dfa", "min" };
             var goldens = GoldenFile.Load();
+            var cases = GoldenFile.Cases();
+
             var ruleNames = GoldenFile
                 .ReadRules(Path.Combine(TestPaths.TestCases, "slow-6-rules.rl"))
                 .Select(kv => kv.Key)
                 .ToList();
-
             Assert.Equal(6, ruleNames.Count);
             foreach (var rule in ruleNames)
+                Assert.Contains(rule, cases.Select(kv => kv.Key));
+
+            foreach (var c in cases)
             {
-                Assert.True(goldens.Any(g => g.Name == rule),
-                    "No golden recorded for rule " + rule + ".");
+                var stages = goldens.Where(g => g.Name == c.Key).Select(g => g.Stage).ToList();
+                foreach (var stage in expectedStages)
+                {
+                    Assert.True(stages.Count(s => s == stage) == 1,
+                        string.Format("{0}: expected exactly one '{1}' row, found {2}.",
+                                      c.Key, stage, stages.Count(s => s == stage)));
+                }
+                Assert.True(stages.Count == expectedStages.Length,
+                    c.Key + ": unexpected extra rows " +
+                    string.Join(",", stages.Except(expectedStages).ToArray()));
             }
+
+            Assert.Equal(cases.Count * expectedStages.Length, goldens.Count);
         }
     }
 
@@ -150,7 +171,12 @@ namespace Rolex.Tests
             {
                 if (line.Length == 0 || line[0] == '#') continue;
                 var parts = line.Split('\t');
-                if (parts.Length != 3) continue;
+                // Reject rather than skip: a malformed row silently dropped is a golden
+                // silently not asserted, which is the one failure mode this file must not have.
+                if (parts.Length != 3)
+                    throw new InvalidDataException(
+                        string.Format("{0}: expected 3 tab-separated columns, found {1} in: {2}",
+                                      path, parts.Length, line.Length > 80 ? line.Substring(0, 80) + "..." : line));
 
                 var table = parts[2].Length == 0
                     ? new int[0]
