@@ -1148,16 +1148,16 @@ expr=Repeat(expr,min,max,accept,compact);break;}return expr;}static byte _FromHe
  pc){if(-1==pc.Current)return-1;switch(pc.Current){case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';case't':pc.Advance();return'\t';case
 'n':pc.Advance();return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';byte b=_FromHexChar(pc.Current);
 if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return
- unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);return
+ unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);pc.Advance();return
  unchecked(b);case'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);
-u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);return
+u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);pc.Advance();return
  unchecked(u);default:int i=pc.Current;pc.Advance();return i;}}static int _ParseRangeEscapePart(LexContext pc){if(-1==pc.Current)return-1;switch(pc.Current)
 {case'0':pc.Advance();return'\0';case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';case't':pc.Advance();return'\t';case'n':pc.Advance();
 return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';byte b=_FromHexChar(pc.Current);if(-1==pc.Advance()
 ||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;
-b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);return unchecked(b);case
+b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);pc.Advance();return unchecked(b);case
 'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if
-(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);return unchecked(u);
+(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);pc.Advance();return unchecked(u);
 default:int i=pc.Current;pc.Advance();return i;}}/// <summary>
 /// Turns packed ranges into unpacked ranges
 /// </summary>
@@ -1704,15 +1704,15 @@ internal static string EscapeRangeChar(string character){var codepoint=char.Conv
 case't':pc.Advance();return'\t';case'n':pc.Advance();return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return
 'x';byte b=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()
 ||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;
-b|=_FromHexChar(pc.Current);return unchecked(b);case'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return
+b|=_FromHexChar(pc.Current);pc.Advance();return unchecked(b);case'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return
  unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);
-u|=_FromHexChar(pc.Current);return unchecked(u);default:int i=pc.Current;pc.Advance();return i;}}static int _ParseRangeEscapePart(LexContext pc){if(-1==
+u|=_FromHexChar(pc.Current);pc.Advance();return unchecked(u);default:int i=pc.Current;pc.Advance();return i;}}static int _ParseRangeEscapePart(LexContext pc){if(-1==
 pc.Current)return-1;switch(pc.Current){case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';case't':pc.Advance();return'\t';case'n':pc.Advance();
 return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';byte b=_FromHexChar(pc.Current);if(-1==pc.Advance()
 ||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;
-b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);return unchecked(b);case
+b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);pc.Advance();return unchecked(b);case
 'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if
-(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);return unchecked(u);
+(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);pc.Advance();return unchecked(u);
 default:int i=pc.Current;pc.Advance();return i;}}static int _ReadRangeChar(IEnumerator<int>e){int ch;if('\\'!=e.Current||!e.MoveNext()){return e.Current;
 }ch=e.Current;switch(ch){case't':ch='\t';break;case'n':ch='\n';break;case'r':ch='\r';break;case'0':ch='\0';break;case'v':ch='\v';break;case'f':ch='\f';
 break;case'b':ch='\b';break;case'x':if(!e.MoveNext())throw new Exception("Expecting input for escape \\x");ch=e.Current;byte x=_FromHexChar(ch);if(!e.MoveNext())

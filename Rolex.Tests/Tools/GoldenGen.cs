@@ -5,8 +5,14 @@ using System.IO;
 using System.Text;
 using F;
 
-// Dumps FA-level golden state tables. Built against the PRE-FIX FA.brick.cs so the
-// recorded tables carry real pre-fix provenance, then asserted against post-fix code.
+// Dumps FA-level golden state tables. Built against the PRE-FIX FA.brick.cs - master's
+// engine, with only the \u/\x escape fix applied - so the recorded tables carry real
+// pre-fix provenance, then asserted against post-fix code.
+//
+// The escape fix has to be in the recording too: it changes what the escape-bearing rules
+// mean, so a table recorded without it would pin a language nothing should produce. It is
+// the only change carried over; the determinization rewrite these tables are evidence for
+// is deliberately absent.
 static class GoldenGen
 {
     static IEnumerable<KeyValuePair<string, string>> RuleRegexes(string rlPath)
@@ -58,7 +64,7 @@ static class GoldenGen
         {
             w.NewLine = "\n";
             w.WriteLine("# name\tstage\tpacked-state-table");
-            w.WriteLine("# generated from the PRE-FIX FA.brick.cs");
+            w.WriteLine("# generated from the pre-determinization-fix FA.brick.cs, with the unicode and hex escape fix applied");
             foreach (var kv in BuildCases(rl))
             {
                 var nfa = FA.Parse(kv.Value, 0, true);
