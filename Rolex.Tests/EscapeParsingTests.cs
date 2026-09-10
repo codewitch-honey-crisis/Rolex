@@ -190,6 +190,55 @@ namespace Rolex.Tests
             Assert.Equal(expected, Accepts(Machine(parser, pattern), input));
         }
 
+        // ---- \x above 0x00FF ---------------------------------------------------
+
+        /// <summary>
+        /// Both switches accumulate the four hex digits of \xXXXX into a `byte`, so any
+        /// value above 0x00FF is silently truncated by the third and fourth `b <<= 4`.
+        /// \u is unaffected - it accumulates into a `ushort`.
+        ///
+        /// \x20AC came out as 0x00AC: 2, 0, A, C shifted through eight bits keeps only the
+        /// low two nibbles. Like the cursor bug, nothing reports it - the grammar just
+        /// means a different character.
+        /// </summary>
+        [Theory]
+        [InlineData("FA.Parse", @"\x20AC", 0x20AC)]
+        [InlineData("FA.Parse", @"\x0100", 0x0100)]
+        [InlineData("FA.Parse", @"\xFFFF", 0xFFFF)]
+        [InlineData("RegexExpression.Parse", @"\x20AC", 0x20AC)]
+        [InlineData("RegexExpression.Parse", @"\x0100", 0x0100)]
+        [InlineData("RegexExpression.Parse", @"\xFFFF", 0xFFFF)]
+        public void Hex_escape_above_one_byte_keeps_all_four_digits(
+            string parser, string pattern, int expected)
+        {
+            var t = Assert.Single(Machine(parser, pattern).Transitions);
+            Assert.Equal(expected, t.Min);
+            Assert.Equal(expected, t.Max);
+        }
+
+        /// <summary>The same truncation inside a charset range, via _ParseRangeEscapePart.</summary>
+        [Theory]
+        [MemberData(nameof(BothParsers))]
+        public void Hex_escape_range_above_one_byte_is_exactly_that_range(string parser)
+        {
+            var t = Assert.Single(Machine(parser, @"[\x0100-\x20AC]").Transitions);
+            Assert.Equal(0x0100, t.Min);
+            Assert.Equal(0x20AC, t.Max);
+        }
+
+        /// <summary>Values that already fit in a byte must not move.</summary>
+        [Theory]
+        [InlineData("FA.Parse", @"\x0041", 0x41)]
+        [InlineData("FA.Parse", @"\x00FF", 0xFF)]
+        [InlineData("RegexExpression.Parse", @"\x0041", 0x41)]
+        [InlineData("RegexExpression.Parse", @"\x00FF", 0xFF)]
+        public void Hex_escape_within_one_byte_is_unchanged(string parser, string pattern, int expected)
+        {
+            var t = Assert.Single(Machine(parser, pattern).Transitions);
+            Assert.Equal(expected, t.Min);
+            Assert.Equal(expected, t.Max);
+        }
+
         /// <summary>Walks a DFA over the input. Returns false if it falls off the machine.</summary>
         private static bool Accepts(FA dfa, string input)
         {

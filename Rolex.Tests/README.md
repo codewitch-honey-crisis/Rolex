@@ -4,7 +4,7 @@ Covers the determinization and unicode escape fixes in `Rolex/FA.brick.cs`. Run 
 
     dotnet test Rolex.Tests\Rolex.Tests.csproj
 
-160 tests, about 3 seconds. Against the engine as it was *before* the fix the same
+172 tests, about 3 seconds. Against the engine as it was *before* the fix the same
 suite takes just over 6 minutes, which is the problem it exists to catch.
 
 ## Why the engine is source-linked rather than referenced
@@ -55,6 +55,13 @@ came out as 49..90 rather than 65..90. Covers both front ends in `FA.brick.cs`,
 and pins the branches the fix must not move - the short forms of `\x`, the
 non-hex escapes, and the fact that `RegexExpression` reads `\u` as the POSIX
 upper class rather than as an escape at all.
+
+It also covers a second defect in the same two switches, found in review: both
+accumulated the four hex digits of `\xXXXX` into a `byte`, so the third and
+fourth `b <<= 4` discarded the high bits and any value above `0x00FF` came out
+wrong - `\x20AC` as `0x00AC`. `\u` was never affected; it accumulates into a
+`ushort`. Same failure mode as the cursor bug: the grammar silently means a
+different character and nothing reports it.
 
 **`GeneratedOutputTests`** - end to end. Runs the real `rolex.exe` over every
 grammar in `testcases/` and checks the emitted file against the SHA-256 goldens
