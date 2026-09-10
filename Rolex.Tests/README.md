@@ -1,10 +1,10 @@
 # Rolex.Tests
 
-Covers the determinization fix in `Rolex/FA.brick.cs`. Run with:
+Covers the determinization and unicode escape fixes in `Rolex/FA.brick.cs`. Run with:
 
     dotnet test Rolex.Tests\Rolex.Tests.csproj
 
-114 tests, about 7 seconds. Against the engine as it was *before* the fix the same
+160 tests, about 3 seconds. Against the engine as it was *before* the fix the same
 suite takes just over 6 minutes, which is the problem it exists to catch.
 
 ## Why the engine is source-linked rather than referenced
@@ -47,6 +47,15 @@ Plus language sampling over both the determinized and minimized machines,
 including R1C1 references such as `R1048576C16384` (accepted) and `R1048577C1`
 (rejected).
 
+**`EscapeParsingTests`** - the unicode escape fix. `_ParseEscapePart` and
+`_ParseRangeEscapePart` read the four hex digits of a `\uXXXX` or `\xXXXX` escape
+and returned without advancing past the last one, so the trailing digit was read
+again as a literal and the grammar silently meant something else: `[\u0041-\u005A]`
+came out as 49..90 rather than 65..90. Covers both front ends in `FA.brick.cs`,
+and pins the branches the fix must not move - the short forms of `\x`, the
+non-hex escapes, and the fact that `RegexExpression` reads `\u` as the POSIX
+upper class rather than as an escape at all.
+
 **`GeneratedOutputTests`** - end to end. Runs the real `rolex.exe` over every
 grammar in `testcases/` and checks the emitted file against the SHA-256 goldens
 in `testcases/expected.txt`.
@@ -60,9 +69,18 @@ they exist to catch a return of super-linear growth, not to police milliseconds.
 
 ## Provenance of the goldens
 
-`TestData/fa-golden.tsv` was recorded from the engine **before** the fix, using
-`Tools/GoldenGen.cs` compiled against the pre-fix `FA.brick.cs`. That is what
-makes it evidence rather than a snapshot of current behaviour.
+`TestData/fa-golden.tsv` was recorded from the engine **before** the
+determinization fix, using `Tools/GoldenGen.cs` compiled against the pre-fix
+`FA.brick.cs`. That is what makes it evidence rather than a snapshot of current
+behaviour.
+
+The recording carries one later change: the unicode escape fix is applied to that
+pre-fix `FA.brick.cs` before recording. It has to be, because it corrects what the
+escape-bearing rules mean, and a table recorded without it would pin a language
+nothing should produce. Nine of the thirty-nine rows moved when it was re-recorded,
+all of them belonging to `CELL_FUNCTION_LIST`, `SHEET_RANGE_PREFIX` and
+`SINGLE_SHEET_PREFIX` - the only three rules in `slow-6-rules.rl` that use escapes.
+The other ten cases are byte-identical to the original recording.
 
 `Tools/GoldenGen.cs` is excluded from compilation and kept only so the file can
 be reproduced. Re-recording is not a routine action - if these tables change,

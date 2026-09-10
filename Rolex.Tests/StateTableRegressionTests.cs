@@ -18,6 +18,12 @@ namespace Rolex.Tests
     ///
     /// A failure here means the DFA changed, which is a correctness regression -
     /// strictly worse than the memory problem the fix was for.
+    ///
+    /// The recording carries one later change: the unicode escape fix, which corrected
+    /// what the three escape-bearing rules mean. Leaving it out would pin a language
+    /// nothing should produce. It is applied to the pre-determinization engine when the
+    /// file is recorded, so these tables remain independent evidence for the
+    /// determinization fix - see Rolex.Tests/README.md.
     /// </summary>
     public class StateTableRegressionTests
     {

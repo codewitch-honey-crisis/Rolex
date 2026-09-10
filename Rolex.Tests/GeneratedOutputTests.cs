@@ -18,6 +18,11 @@ namespace Rolex.Tests
     /// immediately before the determinization fix, so they still assert "the tables
     /// did not change". oom-7-rules and full-r1c1 could not be generated at all
     /// before the fix - for those, passing at all is the point.
+    ///
+    /// The six grammars that use escapes were re-recorded for the unicode escape fix,
+    /// from that same pre-determinization build with only the escape fix applied. They
+    /// came out byte-identical to the fully fixed build, so these still assert exactly
+    /// what they did before.
     /// </summary>
     public class GeneratedOutputTests
     {

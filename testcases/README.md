@@ -18,6 +18,13 @@ a mismatch on those is a DFA correctness regression, not a performance change.
 `oom-7-rules` and `full-r1c1` could not be generated at all before the fix, so
 their hashes lock in post-fix behaviour.
 
+Six of the eight were re-recorded once, for the unicode escape fix, which changed
+what the escape-bearing rules mean. They were re-captured from that same
+pre-determinization build with only the escape fix applied, and they came out
+byte-identical to the fully fixed build - so the determinization fix is still
+output-neutral on every grammar here. `rules-1` and `rules-2` use no escapes and
+have never changed.
+
 Use `-Update` to re-record the hashes, and only when the tables are meant to
 change.
 
