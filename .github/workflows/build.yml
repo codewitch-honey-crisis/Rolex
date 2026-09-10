@@ -1,0 +1,58 @@
+name: Build and test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+# Rolex targets .NET Framework 4.7.2 with a non-SDK project, so this has to be
+# Windows and has to use full MSBuild. `dotnet build` cannot build Rolex.csproj.
+jobs:
+  build:
+    name: Build and test (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~\.nuget\packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: msbuild Rolex.sln -t:Restore -v:minimal -nologo
+
+      # Build the generator on its own first. RolexDemo and RolexDemoVB invoke
+      # $(SolutionDir)Rolex.exe from a pre-build event, but nothing declares that
+      # as a project dependency and rolex.exe is not committed - so on a parallel
+      # build of a fresh clone the demos can start before it exists. Building this
+      # project first makes the ordering explicit instead of relying on the order
+      # projects happen to appear in the .sln.
+      - name: Build generator
+        run: msbuild Rolex\Rolex.csproj -t:Build -p:Configuration=Release -p:SolutionDir="$pwd\" -v:minimal -nologo
+
+      - name: Build solution
+        run: msbuild Rolex.sln -p:Configuration=Release -v:minimal -nologo -m
+
+      - name: Test
+        run: dotnet test Rolex.Tests\Rolex.Tests.csproj -c Release --no-build --nologo --logger "trx;LogFileName=results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: Rolex.Tests\TestResults\*.trx
+          if-no-files-found: warn
