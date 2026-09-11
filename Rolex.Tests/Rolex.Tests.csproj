@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Rolex.Tests</AssemblyName>
+    <RootNamespace>Rolex.Tests</RootNamespace>
+    <!-- FA.brick.cs is vendored, minified upstream source. Don't let its style
+         warnings drown the test output. -->
+    <NoWarn>$(NoWarn);CS0618;SYSLIB0014</NoWarn>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <!--
+    The engine is compiled INTO this test assembly rather than referenced.
+
+    Rolex.csproj produces a strong-name signed Exe, and `class FA` has no access
+    modifier, so it is internal to that assembly. A ProjectReference therefore
+    cannot see it, and InternalsVisibleTo would need the full public key of
+    Key.snk. Linking the source is the least intrusive way in: same source file,
+    no changes required to the shipping project.
+  -->
+  <ItemGroup>
+    <Compile Include="..\Rolex\FA.brick.cs" Link="Engine\FA.brick.cs" />
+    <Compile Include="..\Rolex\LexContext.brick.cs" Link="Engine\LexContext.brick.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Update, not Include: the SDK's default None glob already picks this up,
+         so Include would add it a second time. -->
+    <None Update="TestData\fa-golden.tsv" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Tools\ holds the one-off golden recorder. It has its own Main and is kept for
+       reproducibility only - see Rolex.Tests\README.md. Never compiled into the tests. -->
+  <ItemGroup>
+    <Compile Remove="Tools\**" />
+    <None Include="Tools\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
+
+</Project>

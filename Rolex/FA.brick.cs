@@ -946,9 +946,9 @@ public FA FindFirst(FAFindFilter filter){var set=new HashSet<FA>();return _FindF
 /// <remarks>The epsilon closure is the list of all states reachable from this state on no input.</remarks>
 /// <param name="result">The result to fill or null</param>
 /// <returns>A list filled with the epsilon closure. If <paramref name="result"/> is specified, that instance will be filled and returned. Otherwise a new list is filled and returned.</returns>
-public IList<FA>FillEpsilonClosure(IList<FA>result=null){if(null==result)result=new List<FA>();if(result.Contains(this)){return result;}if(result.Contains(this))
-return result;result.Add(this);for(int ic=Transitions.Count,i=0;i<ic;++i){var t=Transitions[i];if(t.Min==-1&&t.Max==-1){t.To.FillEpsilonClosure(result);
-}}return result;}/// <summary>
+public IList<FA>FillEpsilonClosure(IList<FA>result=null){if(null==result)result=new List<FA>();_FillEpsilonClosure(result,new HashSet<FA>(result));return
+ result;}void _FillEpsilonClosure(IList<FA>result,HashSet<FA>seen){if(!seen.Add(this)){return;}result.Add(this);for(int ic=Transitions.Count,i=0;i<ic;++i)
+{var t=Transitions[i];if(t.Min==-1&&t.Max==-1){t.To._FillEpsilonClosure(result,seen);}}}/// <summary>
 /// Computes the total epsilon closure of a list of states
 /// </summary>
 /// <remarks>The epsilon closure is the list of all states reachable from these states on no input.</remarks>
@@ -1146,18 +1146,18 @@ expr=Repeat(expr,min,max,accept,compact);break;}return expr;}static byte _FromHe
 <hex)return(byte)(hex-'7'); if('g'>hex&&'`'<hex)return(byte)(hex-'W'); throw new ArgumentException("The value was not hex.","hex");}static bool _IsHexChar(int
  hex){if(':'>hex&&'/'<hex)return true;if('G'>hex&&'@'<hex)return true;if('g'>hex&&'`'<hex)return true;return false;} static int _ParseEscapePart(LexContext
  pc){if(-1==pc.Current)return-1;switch(pc.Current){case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';case't':pc.Advance();return'\t';case
-'n':pc.Advance();return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';byte b=_FromHexChar(pc.Current);
+'n':pc.Advance();return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';int b=_FromHexChar(pc.Current);
 if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return
- unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);return
+ unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);pc.Advance();return
  unchecked(b);case'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);
-u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);return
+u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);pc.Advance();return
  unchecked(u);default:int i=pc.Current;pc.Advance();return i;}}static int _ParseRangeEscapePart(LexContext pc){if(-1==pc.Current)return-1;switch(pc.Current)
 {case'0':pc.Advance();return'\0';case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';case't':pc.Advance();return'\t';case'n':pc.Advance();
-return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';byte b=_FromHexChar(pc.Current);if(-1==pc.Advance()
+return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';int b=_FromHexChar(pc.Current);if(-1==pc.Advance()
 ||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;
-b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);return unchecked(b);case
+b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);pc.Advance();return unchecked(b);case
 'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if
-(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);return unchecked(u);
+(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);pc.Advance();return unchecked(u);
 default:int i=pc.Current;pc.Advance();return i;}}/// <summary>
 /// Turns packed ranges into unpacked ranges
 /// </summary>
@@ -1207,7 +1207,7 @@ public static void Totalize(IList<FA>closure){var s=new FA();s.Transitions.Add(n
 }if(t.Min>maxi){p.Transitions.Add(new FATransition(maxi,(t.Min-1),s));}if(t.Max+1>maxi){maxi=t.Max+1;}}if(maxi<=0x10ffff){p.Transitions.Add(new FATransition(maxi,
 0x10ffff,s));}}}static FA _Minimize(FA a,IProgress<int>progress){int prog=0;if(progress!=null){progress.Report(prog);}a=a.ToDfa(progress);var tr=a.Transitions;
 if(1==tr.Count){FATransition t=tr[0];if(t.To==a&&t.Min==0&&t.Max==0x10ffff){return a;}}a.Totalize();prog=1;if(progress!=null){progress.Report(prog);} var
- cl=a.FillClosure();var states=new FA[cl.Count];int number=0;foreach(var q in cl){states[number]=q;q.Tag=number;++number;}var pp=new List<int>();for(int
+ cl=a.FillClosure();var states=new FA[cl.Count];int number=0;foreach(var q in cl){states[number]=q;q.Tag=number;++number;}var pp=new HashSet<int>();for(int
  ic=cl.Count,i=0;i<ic;++i){var ffa=cl[i];pp.Add(0);foreach(var t in ffa.Transitions){pp.Add(t.Min);if(t.Max<0x10ffff){pp.Add((t.Max+1));}}}var sigma=new
  int[pp.Count];pp.CopyTo(sigma,0);Array.Sort(sigma); var reverse=new List<List<Queue<FA>>>();foreach(var s in states){var v=new List<Queue<FA>>();_Init(v,
 sigma.Length);reverse.Add(v);}prog=2;if(progress!=null){progress.Report(prog);}var reverseNonempty=new bool[states.Length,sigma.Length];var partition=
@@ -1231,8 +1231,8 @@ splitblock[j].Add(s);if(!refine2[j]){refine2[j]=true;refine.Add(j);}}}}++prog;if
 {progress.Report(prog);} var newstates=new FA[k];for(int n=0;n<newstates.Length;n++){var s=new FA();newstates[n]=s;foreach(var q in partition[n]){if(q
 ==a){a=s;}s.AcceptSymbol=q.AcceptSymbol;s.Tag=q.Tag; q.Tag=n;}++prog;if(progress!=null){progress.Report(prog);}} foreach(var s in newstates){var st=states[s.Tag];
 s.AcceptSymbol=st.AcceptSymbol;foreach(var t in st.Transitions){s.Transitions.Add(new FATransition(t.Min,t.Max,newstates[t.To.Tag]));}++prog;if(progress
-!=null){progress.Report(prog);}} foreach(var ffa in a.FillClosure()){var itrns=new List<FATransition>(ffa.Transitions);foreach(var trns in itrns){var acc
-=trns.To.FillAcceptingStates();if(0==acc.Count){ffa.Transitions.Remove(trns);}}}return a;}FA _Step(int input){for(int ic=Transitions.Count,i=0;i<ic;++i)
+!=null){progress.Report(prog);}} var acl=a.FillClosure();var acanacc=_FillCanReachAccepting(acl);for(int ic=acl.Count,ai=0;ai<ic;++ai){var ffa=acl[ai];var itrns=new List<FATransition>(ffa.Transitions);
+foreach(var trns in itrns){if(!acanacc.Contains(trns.To)){ffa.Transitions.Remove(trns);}}}return a;}FA _Step(int input){for(int ic=Transitions.Count,i=0;i<ic;++i)
 {var t=Transitions[i];if(t.Min<=input&&input<=t.Max)return t.To;}return null;}static void _Init<T>(IList<T>list,int count){for(int i=0;i<count;++i){list.Add(default(T));
 }}private sealed class _FList{public int Count{get;set;}public _FListNode First{get;set;}public _FListNode Last{get;set;}public _FListNode Add(FA q){return
  new _FListNode(q,this);}}/// <summary>
@@ -1255,21 +1255,28 @@ var prlen=fa[si++];for(var j=0;j<prlen;++j){var pmin=fa[si++];var pmax=fa[si++];
 }private sealed class _FListNode{public _FListNode(FA q,_FList sl){State=q;StateList=sl;if(sl.Count++==0){sl.First=sl.Last=this;}else{sl.Last.Next=this;
 Prev=sl.Last;sl.Last=this;}}public _FListNode Next{get;private set;}private _FListNode Prev{get;set;}public _FList StateList{get;private set;}public FA
  State{get;private set;}public void Remove(){StateList.Count--;if(StateList.First==this){StateList.First=Next;}else{Prev.Next=Next;}if(StateList.Last==
-this){StateList.Last=Prev;}else{Next.Prev=Prev;}}}static FA _Determinize(FA fa,IProgress<int>progress){int prog=0;if(progress!=null){progress.Report(prog);
+this){StateList.Last=Prev;}else{Next.Prev=Prev;}}}static HashSet<FA>_FillCanReachAccepting(IList<FA>closure){var rev=new Dictionary<FA,List<FA>>(closure.Count);for(int ic=closure.Count,i=0;i<ic;++i){rev[closure[i]]
+=new List<FA>();}for(int ic=closure.Count,i=0;i<ic;++i){var ffa=closure[i];for(int jc=ffa.Transitions.Count,j=0;j<jc;++j){List<FA>pres;if(rev.TryGetValue(ffa.Transitions[j].To,
+out pres)){pres.Add(ffa);}}}var result=new HashSet<FA>();var q=new Queue<FA>();for(int ic=closure.Count,i=0;i<ic;++i){var ffa=closure[i];if(ffa.IsAccepting
+&&result.Add(ffa)){q.Enqueue(ffa);}}while(q.Count>0){var pres=rev[q.Dequeue()];for(int jc=pres.Count,j=0;j<jc;++j){var pre=pres[j];if(result.Add(pre)){q.Enqueue(pre);
+}}}return result;}static FA _Determinize(FA fa,IProgress<int>progress){int prog=0;if(progress!=null){progress.Report(prog);
 }var p=new HashSet<int>();var closure=new List<FA>();fa.FillClosure(closure);for(int ic=closure.Count,i=0;i<ic;++i){var ffa=closure[i];p.Add(0);foreach
 (var t in ffa.Transitions){if(t.Min==-1&&t.Max==-1){continue;}p.Add(t.Min);if(t.Max<0x10ffff){p.Add((t.Max+1));}}}var points=new int[p.Count];p.CopyTo(points,
 0);Array.Sort(points);++prog;if(progress!=null){progress.Report(prog);}var sets=new Dictionary<_KeySet<FA>,_KeySet<FA>>();var working=new Queue<_KeySet<FA>>();
 var dfaMap=new Dictionary<_KeySet<FA>,FA>();var initial=new _KeySet<FA>();var epscl=new List<FA>();fa.FillEpsilonClosure(epscl);foreach(var efa in epscl)
 {initial.Add(efa);}sets.Add(initial,initial);working.Enqueue(initial);var result=new FA();result.FromStates=epscl.ToArray();foreach(var afa in initial)
-{if(afa.IsAccepting){result.AcceptSymbol=afa.AcceptSymbol;break;}}++prog;if(progress!=null){progress.Report(prog);}dfaMap.Add(initial,result);while(working.Count
->0){var s=working.Dequeue();FA dfa;dfaMap.TryGetValue(s,out dfa);foreach(FA q in s){if(q.IsAccepting){dfa.AcceptSymbol=q.AcceptSymbol;break;}}for(var i
-=0;i<points.Length;i++){var pnt=points[i];var set=new _KeySet<FA>();foreach(FA c in s){var ecs=c.FillEpsilonClosure();foreach(var efa in ecs){foreach(var
- trns in efa.Transitions){if(trns.Min==-1&&trns.Max==-1){continue;}if(trns.Min<=pnt&&pnt<=trns.Max){foreach(var eefa in trns.To.FillEpsilonClosure()){
-set.Add(eefa);}}}}}if(!sets.ContainsKey(set)){sets.Add(set,set);working.Enqueue(set);var newfa=new FA();dfaMap.Add(set,newfa);var fas=new List<FA>(set);
+{if(afa.IsAccepting){result.AcceptSymbol=afa.AcceptSymbol;break;}}++prog;if(progress!=null){progress.Report(prog);}dfaMap.Add(initial,result);var epscls=new Dictionary<FA,IList<FA>>(closure.Count);for(int ic=closure.Count,i=0;i<ic;++i){var cfa=closure[i];epscls[cfa]
+=cfa.FillEpsilonClosure();}while(working.Count
+>0){var s=working.Dequeue();FA dfa;dfaMap.TryGetValue(s,out dfa);foreach(FA q in s){if(q.IsAccepting){dfa.AcceptSymbol=q.AcceptSymbol;break;}}var psets=new _KeySet<FA>[points.Length];for(var i=0;i<points.Length;i++){psets[i]=new _KeySet<FA>();}foreach(FA c in s){IList<FA>ecs;if(!epscls.TryGetValue(c,
+out ecs)){ecs=c.FillEpsilonClosure();epscls[c]=ecs;}foreach(var efa in ecs){foreach(var trns in efa.Transitions){if(trns.Min==-1&&trns.Max==-1){continue;
+}var lo=Array.BinarySearch(points,trns.Min);if(lo<0){lo=~lo;}if(lo>=points.Length||points[lo]>trns.Max){continue;}IList<FA>tecs;if(!epscls.TryGetValue(trns.To,
+out tecs)){tecs=trns.To.FillEpsilonClosure();epscls[trns.To]=tecs;}for(var i=lo;i<points.Length&&points[i]<=trns.Max;++i){var pset=psets[i];for(int kc=tecs.Count,
+k=0;k<kc;++k){pset.Add(tecs[k]);}}}}}for(var i
+=0;i<points.Length;i++){var pnt=points[i];var set=psets[i];if(!sets.ContainsKey(set)){sets.Add(set,set);working.Enqueue(set);var newfa=new FA();dfaMap.Add(set,newfa);var fas=new List<FA>(set);
 newfa.FromStates=fas.ToArray();}FA dst;dfaMap.TryGetValue(set,out dst);int first=pnt;int last;if(i+1<points.Length)last=(points[i+1]-1);else last=0x10ffff;
 dfa.Transitions.Add(new FATransition(first,last,dst));++prog;if(progress!=null){progress.Report(prog);}}++prog;if(progress!=null){progress.Report(prog);
-}} foreach(var ffa in result.FillClosure()){var itrns=new List<FATransition>(ffa.Transitions);foreach(var trns in itrns){var acc=trns.To.FillAcceptingStates();
-if(0==acc.Count){ffa.Transitions.Remove(trns);}}++prog;if(progress!=null){progress.Report(prog);}}++prog;if(progress!=null){progress.Report(prog);}return
+}} var rcl=result.FillClosure();var canacc=_FillCanReachAccepting(rcl);for(int ic=rcl.Count,ri=0;ri<ic;++ri){var ffa=rcl[ri];var itrns=new List<FATransition>(ffa.Transitions);
+foreach(var trns in itrns){if(!canacc.Contains(trns.To)){ffa.Transitions.Remove(trns);}}++prog;if(progress!=null){progress.Report(prog);}}++prog;if(progress!=null){progress.Report(prog);}return
  result;}/// <summary>
 /// Indicates whether or not the collection of states contains an accepting state
 /// </summary>
@@ -1413,7 +1420,7 @@ public static IEnumerable<int>ToUtf32(IEnumerable<char>@string){int chh=-1;forea
  chh=-1;if(-1!=chh){if(!char.IsLowSurrogate(ch))throw new IOException("Unterminated Unicode surrogate pair found in string.");yield return char.ConvertToUtf32(unchecked((char)chh),
 ch);chh=-1;continue;}yield return ch;}}private sealed class _KeySet<T>:ISet<T>,IEquatable<_KeySet<T>>{HashSet<T>_inner;int _hashCode;public _KeySet(IEqualityComparer<T>
 comparer){_inner=new HashSet<T>(comparer);_hashCode=0;}public _KeySet(){_inner=new HashSet<T>();_hashCode=0;}public int Count=>_inner.Count;public bool
- IsReadOnly=>true; public bool Add(T item){if(null!=item)_hashCode^=item.GetHashCode();return _inner.Add(item);}bool ISet<T>.Add(T item){_ThrowReadOnly();
+ IsReadOnly=>true; public bool Add(T item){if(!_inner.Add(item))return false;if(null!=item)_hashCode^=item.GetHashCode();return true;}bool ISet<T>.Add(T item){_ThrowReadOnly();
 return false;}public void Clear(){_ThrowReadOnly();}public bool Contains(T item){return _inner.Contains(item);}public void CopyTo(T[]array,int arrayIndex)
 {_inner.CopyTo(array,arrayIndex);}void ISet<T>.ExceptWith(IEnumerable<T>other){_ThrowReadOnly();}public IEnumerator<T>GetEnumerator(){return _inner.GetEnumerator();
 }void ISet<T>.IntersectWith(IEnumerable<T>other){_ThrowReadOnly();}public bool IsProperSubsetOf(IEnumerable<T>other){return _inner.IsProperSubsetOf(other);
@@ -1695,17 +1702,17 @@ internal static string EscapeRangeChar(string character){var codepoint=char.Conv
 "hex");}static bool _IsHexChar(int hex){if(':'>hex&&'/'<hex)return true;if('G'>hex&&'@'<hex)return true;if('g'>hex&&'`'<hex)return true;return false;}
  static int _ParseEscapePart(LexContext pc){if(-1==pc.Current)return-1;switch(pc.Current){case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';
 case't':pc.Advance();return'\t';case'n':pc.Advance();return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return
-'x';byte b=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()
+'x';int b=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()
 ||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;
-b|=_FromHexChar(pc.Current);return unchecked(b);case'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return
+b|=_FromHexChar(pc.Current);pc.Advance();return unchecked(b);case'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return
  unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);
-u|=_FromHexChar(pc.Current);return unchecked(u);default:int i=pc.Current;pc.Advance();return i;}}static int _ParseRangeEscapePart(LexContext pc){if(-1==
+u|=_FromHexChar(pc.Current);pc.Advance();return unchecked(u);default:int i=pc.Current;pc.Advance();return i;}}static int _ParseRangeEscapePart(LexContext pc){if(-1==
 pc.Current)return-1;switch(pc.Current){case'f':pc.Advance();return'\f';case'v':pc.Advance();return'\v';case't':pc.Advance();return'\t';case'n':pc.Advance();
-return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';byte b=_FromHexChar(pc.Current);if(-1==pc.Advance()
+return'\n';case'r':pc.Advance();return'\r';case'x':if(-1==pc.Advance()||!_IsHexChar(pc.Current))return'x';int b=_FromHexChar(pc.Current);if(-1==pc.Advance()
 ||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;
-b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);return unchecked(b);case
+b|=_FromHexChar(pc.Current);if(-1==pc.Advance()||!_IsHexChar(pc.Current))return unchecked(b);b<<=4;b|=_FromHexChar(pc.Current);pc.Advance();return unchecked(b);case
 'u':if(-1==pc.Advance())return'u';ushort u=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if
-(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);return unchecked(u);
+(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);u<<=4;if(-1==pc.Advance())return unchecked(u);u|=_FromHexChar(pc.Current);pc.Advance();return unchecked(u);
 default:int i=pc.Current;pc.Advance();return i;}}static int _ReadRangeChar(IEnumerator<int>e){int ch;if('\\'!=e.Current||!e.MoveNext()){return e.Current;
 }ch=e.Current;switch(ch){case't':ch='\t';break;case'n':ch='\n';break;case'r':ch='\r';break;case'0':ch='\0';break;case'v':ch='\v';break;case'f':ch='\f';
 break;case'b':ch='\b';break;case'x':if(!e.MoveNext())throw new Exception("Expecting input for escape \\x");ch=e.Current;byte x=_FromHexChar(ch);if(!e.MoveNext())
